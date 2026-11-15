@@ -1,0 +1,36 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectRow from '../../components/ProjectRow.astro';
+import { engineering, design } from '../../data/work';
+---
+
+<Base
+  title="Work — Emmanuel Utulu"
+  description="Selected engineering and design work by Emmanuel Utulu: React and TypeScript applications, event identities and poster series."
+>
+  <section class="page pt-14 md:pt-20">
+    <p class="meta">Selected work — 2025 / 2026</p>
+    <h1 class="display-line mt-6 max-w-[18ch]">Five things, chosen.</h1>
+    <p class="mt-6 max-w-[56ch] text-lg text-[var(--color-fg-soft)]">
+      I’d rather show you a few projects properly than everything I’ve touched. Each one below has
+      a reason for being here.
+    </p>
+  </section>
+
+  <section class="page mt-16 md:mt-20">
+    <div class="section-head">
+      <span class="meta">01</span>
+      <h2 class="font-display text-2xl md:text-3xl">Engineering</h2>
+    </div>
+    {engineering.map((item) => <ProjectRow item={item} />)}
+  </section>
+
+  <section class="page mt-16 md:mt-20">
+    <div class="section-head">
+      <span class="meta">02</span>
+      <h2 class="font-display text-2xl md:text-3xl">Design</h2>
+    </div>
+    {design.map((item) => <ProjectRow item={item} />)}
+    <p class="meta mt-6">Earlier exercises and practice builds are on GitHub.</p>
+  </section>
+</Base>

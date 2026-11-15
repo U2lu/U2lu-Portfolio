@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Contact — Emmanuel Utulu"
+  description="Email Emmanuel Utulu about engineering roles or design work. Lagos, Nigeria, WAT."
+>
+  <section class="page pt-14 md:pt-20">
+    <p class="meta">Contact</p>
+    <h1 class="display-line mt-6 max-w-[18ch]">Hiring, or need something designed?</h1>
+    <p class="mt-6 max-w-[54ch] text-lg text-[var(--color-fg-soft)]">
+      Either way, email is the fastest route. I answer within a day, and I’ll tell you honestly if
+      I’m not the right fit.
+    </p>
+
+    <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+      <a class="btn btn-primary text-base" href="mailto:ayoutulu@gmail.com">ayoutulu@gmail.com</a>
+      <button
+        type="button"
+        id="copy-email"
+        class="btn btn-ghost"
+        data-email="ayoutulu@gmail.com"
+      >
+        Copy address
+      </button>
+      <span id="copy-status" class="meta" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="page mt-16 grid gap-10 md:mt-24 md:grid-cols-2">
+    <div>
+      <h2 class="font-display text-2xl">What to include</h2>
+      <ul class="mt-4 space-y-3 text-[var(--color-fg-soft)]">
+        <li>— The role or the project, in one or two sentences.</li>
+        <li>— Timeline, and whether it’s paid.</li>
+        <li>— A link to the thing you’re building.</li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="font-display text-2xl">Elsewhere</h2>
+      <ul class="mt-4 space-y-3">
+        <li>
+          <a class="link-underline" href="https://github.com/U2lu" rel="me noopener" target="_blank">GitHub ↗</a>
+        </li>
+        <li>
+          <a
+            class="link-underline"
+            href="https://www.linkedin.com/in/emmanuel-utulu/"
+            rel="me noopener"
+            target="_blank">LinkedIn ↗</a
+          >
+        </li>
+        <li>
+          <a class="link-underline" href="https://www.behance.net/u2lu" rel="me noopener" target="_blank">Behance ↗</a>
+        </li>
+      </ul>
+      <p class="meta mt-6">Lagos, Nigeria · WAT (UTC+1)</p>
+    </div>
+  </section>
+
+  <script is:inline>
+    const btn = document.getElementById('copy-email');
+    const status = document.getElementById('copy-status');
+    btn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.email);
+        status.textContent = 'Copied';
+      } catch {
+        status.textContent = 'Press Ctrl+C to copy';
+      }
+      setTimeout(() => (status.textContent = ''), 2500);
+    });
+  </script>
+</Base>

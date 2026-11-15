@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="About — Emmanuel Utulu"
+  description="Emmanuel Utulu is a software engineer in Lagos, Nigeria, who designs. Background in software engineering, practice in brand and poster design."
+>
+  <section class="page pt-14 md:pt-20">
+    <p class="meta">About</p>
+    <h1 class="display-line mt-6 max-w-[20ch]">I build the thing, then I make it make sense.</h1>
+  </section>
+
+  <section class="page mt-14 grid gap-12 md:mt-20 md:grid-cols-[1fr_1.15fr] md:gap-20">
+    <div>
+      <div class="aspect-[4/5] w-full max-w-sm border border-[var(--color-rule-soft)] bg-[var(--color-green-wash)]">
+        <p class="meta p-4">Portrait — to supply</p>
+      </div>
+      <dl class="mt-8 space-y-4 text-sm">
+        <div class="flex justify-between gap-6 border-t border-[var(--color-rule-soft)] pt-3">
+          <dt class="meta">Based</dt>
+          <dd>Lagos, Nigeria (WAT)</dd>
+        </div>
+        <div class="flex justify-between gap-6 border-t border-[var(--color-rule-soft)] pt-3">
+          <dt class="meta">Focus</dt>
+          <dd class="text-right">Front-end engineering, interface design</dd>
+        </div>
+        <div class="flex justify-between gap-6 border-t border-[var(--color-rule-soft)] pt-3">
+          <dt class="meta whitespace-nowrap">Open to</dt>
+          <dd class="text-right">Full-time roles, occasional design work</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="max-w-[60ch] space-y-5 text-[var(--color-fg-soft)]">
+      <p class="text-lg text-[var(--color-fg)]">
+        I studied software engineering because I liked it — not because it was the safe option.
+      </p>
+      <p>
+        Design arrived sideways. Someone needed a YouTube thumbnail, I said yes, and that one
+        favour turned into posters, event identities and campaign work. I got faster at it because
+        I enjoyed it, and because a client was waiting.
+      </p>
+      <p>
+        The two things don’t compete. Design taught me to decide what a page should say before
+        adding anything to it. Engineering taught me that a beautiful decision is worthless if it
+        ships broken, slow, or unnavigable on a phone.
+      </p>
+      <p>
+        Right now I’m working towards the same thing from both sides: applications that are
+        finished, deployed, and worth using. React and TypeScript on the front, learning the rest
+        of the stack properly rather than skimming it.
+      </p>
+      <p>
+        When I’m not building, I’m usually looking at type, football, or both.
+      </p>
+      <div class="flex flex-wrap gap-3 pt-2">
+        <a class="btn btn-ghost" href="mailto:ayoutulu@gmail.com">Email me</a>
+        <a
+          class="btn btn-ghost"
+          href="https://www.linkedin.com/in/emmanuel-utulu/"
+          rel="noopener"
+          target="_blank">LinkedIn ↗</a
+        >
+      </div>
+      <p class="meta pt-2">CV — being updated. Ask me for the current version.</p>
+    </div>
+  </section>
+</Base>

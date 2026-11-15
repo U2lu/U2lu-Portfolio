@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectRow from '../components/ProjectRow.astro';
+import { engineering, design } from '../data/work';
+---
+
+<Base title="Emmanuel Utulu — Software engineer with a designer’s eye">
+  <section class="page pt-14 md:pt-20">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <p class="meta">Emmanuel Utulu — Lagos, Nigeria</p>
+      <p class="pill"><span class="dot"></span> Open to full-time roles</p>
+    </div>
+
+    <h1 class="display-line mt-10 max-w-[16ch]">
+      Software engineer with a designer’s eye.
+    </h1>
+
+    <div class="mt-8 grid gap-8 md:mt-10 md:grid-cols-[1.35fr_1fr] md:items-end">
+      <p class="max-w-[52ch] text-lg text-[var(--color-fg-soft)]">
+        I build interfaces that work, and look deliberate. React and TypeScript mostly — with
+        the designer’s habit of deciding what a thing should look like before writing it.
+      </p>
+      <div class="flex flex-wrap gap-3 md:justify-end">
+        <a class="btn btn-primary" href="#engineering">
+          See the work <span aria-hidden="true">↓</span>
+        </a>
+        <a class="btn btn-ghost" href="mailto:ayoutulu@gmail.com">Email me</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="engineering" class="page mt-20 md:mt-28">
+    <div class="section-head">
+      <span class="meta">01</span>
+      <h2 class="font-display text-2xl md:text-3xl">Engineering</h2>
+      <a class="link-underline meta" href="/work">All work</a>
+    </div>
+
+    <div>
+      {engineering.map((item) => <ProjectRow item={item} />)}
+    </div>
+  </section>
+
+  <section class="page mt-16 md:mt-24">
+    <div class="section-head">
+      <span class="meta">02</span>
+      <h2 class="font-display text-2xl md:text-3xl">Design</h2>
+      <a class="link-underline meta" href="/design">Poster wall</a>
+    </div>
+
+    <div>
+      {design.map((item) => <ProjectRow item={item} />)}
+    </div>
+
+    <p class="meta mt-6">
+      Earlier exercises and practice builds are on GitHub.
+    </p>
+  </section>
+
+  <section class="page mt-20 md:mt-28">
+    <div class="rule"></div>
+    <div class="grid gap-6 pt-8 md:grid-cols-[1fr_1.1fr] md:gap-16">
+      <h2 class="max-w-[18ch] font-display text-3xl md:text-4xl">
+        I studied software engineering. Design found me later.
+      </h2>
+      <div class="max-w-[56ch] space-y-4 text-[var(--color-fg-soft)]">
+        <p>
+          Someone asked me for a YouTube thumbnail. I said yes, and kept going until posters and
+          event identities started arriving. What I learned there sits underneath the code:
+          hierarchy, restraint, and the willingness to throw a version away.
+        </p>
+        <p>
+          Now I want to build applications properly — the whole way through, in production.
+          The design is not a side quest. It’s how I decide what’s worth building.
+        </p>
+        <p><a class="link-underline" href="/about">More about me</a></p>
+      </div>
+    </div>
+  </section>
+</Base>
