@@ -13,8 +13,20 @@ import Base from '../layouts/Base.astro';
 
   <section class="page mt-14 grid gap-12 md:mt-20 md:grid-cols-[1fr_1.15fr] md:gap-20">
     <div>
-      <div class="aspect-[4/5] w-full max-w-sm border border-[var(--color-rule-soft)] bg-[var(--color-green-wash)]">
-        <p class="meta p-4">Portrait — to supply</p>
+      <div
+        class="relative aspect-[4/5] w-full max-w-sm overflow-hidden border border-[var(--color-green-deep)] bg-[var(--color-green-deep)] text-[var(--color-paper)]"
+      >
+        <div class="flex h-full flex-col justify-between p-5">
+          <span class="font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-[var(--color-green-lift)]">
+            U2LU
+          </span>
+          <span class="font-display leading-[0.78] tracking-tight" style="font-size: clamp(4.5rem, 11vw, 7.5rem);">
+            EU
+          </span>
+          <span class="font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-[var(--color-green-lift)]">
+            Lagos · Nigeria
+          </span>
+        </div>
       </div>
       <dl class="mt-8 space-y-4 text-sm">
         <div class="flex justify-between gap-6 border-t border-[var(--color-rule-soft)] pt-3">

@@ -19,6 +19,8 @@
   --color-green: #006400;
   --color-green-lift: #5ce08a;
   --color-green-wash: #dceee2;
+  /* surfaces — these must switch with the theme, palette swatches must not */
+  --color-wash: #dceee2;
 
   /* semantic — overridden for dark below */
   --color-bg: #f4f3ee;
@@ -50,30 +52,32 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-bg: #04240f;
-    --color-surface: #07190d;
-    --color-fg: #f4f3ee;
-    --color-fg-soft: #b8c3b7;
-    --color-rule: #1e3a29;
-    --color-rule-soft: #16301f;
+    --color-bg: #0a0f0a;
+    --color-surface: #141a12;
+    --color-fg: #f2f1ec;
+    --color-fg-soft: #a9b3a7;
+    --color-rule: #2a3426;
+    --color-rule-soft: #1c241a;
     --color-accent: #5ce08a;
     --color-accent-text: #5ce08a;
     --color-btn: #5ce08a;
-    --color-btn-fg: #04240f;
+    --color-btn-fg: #0a0f0a;
+    --color-wash: #16301f;
   }
 }
 
 :root[data-theme="dark"] {
-  --color-bg: #04240f;
-  --color-surface: #07190d;
-  --color-fg: #f4f3ee;
-  --color-fg-soft: #b8c3b7;
-  --color-rule: #1e3a29;
-  --color-rule-soft: #16301f;
+  --color-bg: #0a0f0a;
+  --color-surface: #141a12;
+  --color-fg: #f2f1ec;
+  --color-fg-soft: #a9b3a7;
+  --color-rule: #2a3426;
+  --color-rule-soft: #1c241a;
   --color-accent: #5ce08a;
   --color-accent-text: #5ce08a;
   --color-btn: #5ce08a;
-  --color-btn-fg: #04240f;
+  --color-btn-fg: #0a0f0a;
+  --color-wash: #16301f;
 }
 
 @layer base {
@@ -249,6 +253,130 @@
     background: var(--color-accent);
   }
 
+  /* ---- Poster rail -------------------------------------------------
+     Native horizontal scroll. Drag-to-scroll for mouse users, arrow
+     buttons for keyboard, snap for touch. The skew is the only
+     decorative motion on the site and it decays to zero.
+  ------------------------------------------------------------------- */
+  .rail {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: clamp(1.25rem, 5vw, 4rem);
+    scrollbar-width: none;
+    cursor: grab;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+  .rail:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+  .rail-track {
+    display: flex;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    padding-inline: clamp(1.25rem, 5vw, 4rem);
+    width: max-content;
+  }
+  .tile {
+    width: clamp(15rem, 30vw, 21rem);
+    scroll-snap-align: start;
+  }
+  .tile-panel {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--color-rule-soft);
+    background: var(--color-surface);
+    transform: skewX(calc(var(--rail-v, 0) * 0.6deg));
+    transition: border-color 200ms var(--ease-soft);
+  }
+  .tile-link:hover .tile-panel {
+    border-color: var(--color-accent);
+  }
+  .tile-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .tile-panel--wash {
+    background: var(--color-wash);
+  }
+  .tile-panel--paper {
+    background: var(--color-surface);
+  }
+  .tile-panel--ink {
+    background: var(--color-green-deep);
+    border-color: var(--color-green-deep);
+  }
+  .tile-panel--ink .meta {
+    color: var(--color-green-lift);
+  }
+  .tile-panel--ink .tile-type-title {
+    color: var(--color-paper);
+  }
+  .tile-panel--link {
+    border-style: dashed;
+    background: transparent;
+  }
+  .tile-type {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+  .tile-type-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .rail-btn {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--color-rule);
+    color: var(--color-fg);
+    transition:
+      border-color 160ms var(--ease-soft),
+      color 160ms var(--ease-soft);
+  }
+  .rail-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent-text);
+  }
+  .rail-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .rail-progress {
+    height: 1px;
+    background: var(--color-rule-soft);
+    overflow: hidden;
+  }
+  .rail-progress span {
+    display: block;
+    height: 1px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 120ms linear;
+  }
+
+  /* Controls that only work with JS must not appear without it. */
+  html:not(.has-js) .js-only {
+    display: none !important;
+  }
+
   /* Section headers share the row grid so the left edge never goes ragged */
   .section-head {
     display: grid;
@@ -294,6 +422,9 @@
   html {
     scroll-behavior: auto;
   }
+  .tile-panel {
+    transform: none !important;
+  }
   *,
   *::before,
   *::after {
@@ -308,7 +439,8 @@
    Contrast (WCAG 2.2 AA):
    ink #14180F on paper #F4F3EE ......... 15.4:1
    green #006400 on paper #F4F3EE ........ 6.6:1  (passes body text)
-   lifted green #5CE08A on ink #04240F ... 9.1:1
    paper #F4F3EE on green #006400 ........ 6.6:1  (button fills)
-   green #006400 on ink #04240F .......... 2.3:1  FAILS — never used
+   dark body #F2F1EC on #0A0F0A ......... 17.3:1
+   lifted green #5CE08A on #0A0F0A ...... 9.6:1
+   green #006400 on #0A0F0A ............. 2.4:1  FAILS — never used
 ------------------------------------------------------------------- */

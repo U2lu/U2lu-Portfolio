@@ -31,7 +31,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#f4f3ee" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#04240f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#0a0f0a" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -39,6 +39,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     <meta name="twitter:card" content="summary_large_image" />
     <script is:inline>
       // Set the theme before first paint so there is no flash.
+      document.documentElement.classList.add('has-js');
       try {
         const stored = localStorage.getItem('u2lu-theme');
         if (stored === 'light' || stored === 'dark') {
@@ -58,11 +59,12 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
 
     <header class="border-b border-[var(--color-rule-soft)]">
       <div class="page flex items-center justify-between gap-4 py-4 md:gap-6 md:py-5">
-        <a href="/" class="group flex items-baseline gap-3" aria-label="U2LU — Emmanuel Utulu, home">
+        <a href="/" class="group flex items-baseline gap-3">
           <span class="font-display text-xl leading-none tracking-tight md:text-2xl">
             U<span class="text-[var(--color-accent-text)]">2</span>LU
           </span>
           <span class="meta hidden sm:inline">Emmanuel Utulu</span>
+          <span class="sr-only">— home</span>
         </a>
 
         <nav aria-label="Primary" class="flex items-center gap-3 md:gap-7">

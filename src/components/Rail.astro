@@ -1,0 +1,217 @@
+---
+import { rail } from '../data/rail';
+---
+
+<section aria-labelledby="rail-heading" class="mt-16 md:mt-24">
+  <div class="page flex items-end justify-between gap-6">
+    <div>
+      <h2 id="rail-heading" class="meta">Selected — five pieces</h2>
+      <p class="mt-2 max-w-[38ch] text-sm text-[var(--color-fg-soft)]">
+        Posters, identities and the things I’ve been building. Drag, swipe, or use the arrows.
+      </p>
+    </div>
+
+    <div class="js-only hidden shrink-0 items-center gap-2 sm:flex">
+      <button type="button" class="rail-btn" data-rail-prev aria-label="Previous pieces">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <button type="button" class="rail-btn" data-rail-next aria-label="Next pieces">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="rail mt-6"
+    data-rail
+    tabindex="0"
+    role="region"
+    aria-label="Selected work, horizontally scrollable"
+  >
+    <ul role="list" class="rail-track">
+      {
+        rail.map((item, i) => (
+          <li class="tile">
+            <a
+              class="tile-link group"
+              href={item.href}
+              rel={item.external ? 'noopener' : undefined}
+              target={item.external ? '_blank' : undefined}
+            >
+              <div class:list={['tile-panel', `tile-panel--${item.tone ?? 'wash'}`]}>
+                {item.image ? (
+                  <img src={item.image} alt={item.alt ?? item.title} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+                ) : (
+                  <div class="tile-type">
+                    <span class="meta">{String(i + 1).padStart(2, '0')}</span>
+                    <span class="tile-type-title">{item.title}</span>
+                  </div>
+                )}
+              </div>
+              <div class="pt-3">
+                <p class="font-display text-lg leading-tight transition-colors group-hover:text-[var(--color-accent-text)]">
+                  {item.title}
+                </p>
+                <p class="meta mt-1">{item.meta}</p>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+
+      <li class="tile">
+        <a class="tile-link group" href="/work">
+          <div class="tile-panel tile-panel--link">
+            <div class="tile-type">
+              <span class="meta">All</span>
+              <span class="tile-type-title">Everything<br />else <span aria-hidden="true">→</span></span>
+            </div>
+          </div>
+          <div class="pt-3">
+            <p class="font-display text-lg leading-tight transition-colors group-hover:text-[var(--color-accent-text)]">
+              The full index
+            </p>
+            <p class="meta mt-1">Work</p>
+          </div>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="page mt-3">
+    <div class="rail-progress" aria-hidden="true"><span data-rail-progress></span></div>
+  </div>
+</section>
+
+<script>
+  const rail = document.querySelector<HTMLElement>('[data-rail]');
+  const track = rail?.querySelector<HTMLElement>('.rail-track');
+  const progress = document.querySelector<HTMLElement>('[data-rail-progress]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-rail-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-rail-next]');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (rail && track) {
+    const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+
+    /* ---- velocity skew: the only "motion" flourish on the site ---- */
+    let lastLeft = rail.scrollLeft;
+    let velocity = 0;
+    let raf = 0;
+
+    const decay = () => {
+      velocity *= 0.9;
+      if (Math.abs(velocity) < 0.15) {
+        velocity = 0;
+        track.style.setProperty('--rail-v', '0');
+        raf = 0;
+        return;
+      }
+      track.style.setProperty('--rail-v', velocity.toFixed(2));
+      raf = requestAnimationFrame(decay);
+    };
+
+    rail.addEventListener(
+      'scroll',
+      () => {
+        const left = rail.scrollLeft;
+        const delta = left - lastLeft;
+        lastLeft = left;
+        updateProgress();
+
+        if (!reduced.matches) {
+          velocity = clamp(velocity + delta * 0.22, -4, 4);
+          if (!raf) raf = requestAnimationFrame(decay);
+        }
+      },
+      { passive: true }
+    );
+
+    const updateProgress = () => {
+      const max = rail.scrollWidth - rail.clientWidth;
+      const p = max > 0 ? rail.scrollLeft / max : 0;
+      if (progress) progress.style.transform = `scaleX(${p})`;
+      if (prev) prev.disabled = rail.scrollLeft < 8;
+      if (next) next.disabled = rail.scrollLeft > max - 8;
+    };
+
+    /* ---- drag to scroll, so a mouse user is never stuck ---- */
+    let dragging = false;
+    let moved = 0;
+    let startX = 0;
+    let startScroll = 0;
+
+    rail.addEventListener('pointerdown', (e) => {
+      // Touch already scrolls natively; dragging it by hand fights the browser.
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      dragging = true;
+      moved = 0;
+      startX = e.clientX;
+      startScroll = rail.scrollLeft;
+      rail.setPointerCapture(e.pointerId);
+      rail.classList.add('is-dragging');
+    });
+
+    rail.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      rail.scrollLeft = startScroll - dx;
+    });
+
+    const endDrag = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      rail.classList.remove('is-dragging');
+      if (rail.hasPointerCapture(e.pointerId)) rail.releasePointerCapture(e.pointerId);
+    };
+    rail.addEventListener('pointerup', endDrag);
+    rail.addEventListener('pointercancel', endDrag);
+
+    // A drag that ends on a tile should not navigate.
+    rail.addEventListener(
+      'click',
+      (e) => {
+        if (moved > 6) {
+          e.preventDefault();
+          e.stopPropagation();
+          moved = 0;
+        }
+      },
+      true
+    );
+
+    const step = () => {
+      const tile = track.querySelector<HTMLElement>('.tile');
+      return tile ? tile.offsetWidth + 24 : 320;
+    };
+
+    const scrollBy = (dir: number) => {
+      rail.scrollBy({
+        left: dir * step() * 1.5,
+        behavior: reduced.matches ? 'auto' : 'smooth',
+      });
+    };
+
+    prev?.addEventListener('click', () => scrollBy(-1));
+    next?.addEventListener('click', () => scrollBy(1));
+
+    rail.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        scrollBy(1);
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        scrollBy(-1);
+      }
+    });
+
+    updateProgress();
+    window.addEventListener('resize', updateProgress, { passive: true });
+  }
+</script>
