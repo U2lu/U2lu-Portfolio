@@ -1,0 +1,41 @@
+---
+title: 'Weather App'
+discipline: engineering
+year: '2026'
+summary: 'A single-city weather app built to survive the parts that normally break: a slow request, a city that does not exist, and an API that answers with an error instead of data.'
+role: 'Solo — design and build'
+stack: ['React', 'TypeScript', 'Vite', 'OpenWeather API']
+status: in-progress
+repo: 'https://github.com/U2lu/Weather-app'
+order: 1
+figures:
+  - alt: 'Weather app showing current conditions for one city'
+    caption: 'One city, one panel. Everything else is secondary.'
+  - alt: 'Weather app showing the forecast list beneath the current conditions'
+    caption: 'Forecast below the fold, so the current reading never competes with it.'
+---
+
+## The brief
+
+One screen: a city, its conditions now, and the next few days. No onboarding, no settings, no location permission prompt.
+
+The whole point was the states. Most weather tutorials show you the sunny path and stop.
+
+## What broke first
+
+The API. My first real request came back as an error, and the screen showed nothing — because I had no state for failure. It took me a while to accept that an error is a state the interface has to render, not something you log and hope about.
+
+The second problem was the search field. Typing a new city while a result was on screen left the previous city's weather visible, or blanked the panel entirely while the request was in flight.
+
+## What the code does now
+
+Search is submit-only. The panel only changes when you ask for a city, which removes the flicker between keystrokes but means pressing Enter is a requirement rather than a convenience.
+
+Both fetches check `response.ok` and throw on a non-2xx, so the component never receives half an error object. The panel renders fallbacks rather than crashing when a field is missing, and all the state lives in one place — the child components are presentational. The search bar does not know what a forecast is.
+
+## What I would change
+
+- The condition icon is still requested over `http://`, which will be blocked as mixed content the moment this is served over https. Ten-second fix I have not made.
+- Errors only reach the console. A visible error state is the entire reason this project exists.
+- Requests are not cancelled. A slow response for the previous city can still land after a new one.
+- No tests. The state machine is small enough that three or four would cover it.

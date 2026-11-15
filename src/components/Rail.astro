@@ -36,12 +36,7 @@ import { rail } from '../data/rail';
       {
         rail.map((item, i) => (
           <li class="tile">
-            <a
-              class="tile-link group"
-              href={item.href}
-              rel={item.external ? 'noopener' : undefined}
-              target={item.external ? '_blank' : undefined}
-            >
+            <a class="tile-link group" href={item.href}>
               <div class:list={['tile-panel', `tile-panel--${item.tone ?? 'wash'}`]}>
                 {item.image ? (
                   <img src={item.image} alt={item.alt ?? item.title} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />

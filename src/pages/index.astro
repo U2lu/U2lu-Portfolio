@@ -1,8 +1,14 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import ProjectRow from '../components/ProjectRow.astro';
 import Rail from '../components/Rail.astro';
-import { engineering, design } from '../data/work';
+
+const work = (await getCollection('work', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+const engineering = work.filter((entry) => entry.data.discipline === 'engineering');
+const design = work.filter((entry) => entry.data.discipline === 'design');
 ---
 
 <Base title="Emmanuel Utulu — Software engineer with a designer’s eye">
@@ -40,7 +46,7 @@ import { engineering, design } from '../data/work';
     </div>
 
     <div>
-      {engineering.map((item) => <ProjectRow item={item} />)}
+      {engineering.map((entry) => <ProjectRow entry={entry} />)}
     </div>
   </section>
 
@@ -52,7 +58,7 @@ import { engineering, design } from '../data/work';
     </div>
 
     <div>
-      {design.map((item) => <ProjectRow item={item} />)}
+      {design.map((entry) => <ProjectRow entry={entry} />)}
     </div>
 
     <p class="meta mt-6">

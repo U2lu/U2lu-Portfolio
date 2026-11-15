@@ -1,0 +1,64 @@
+---
+title: 'Premier League Predictions'
+discipline: engineering
+year: '2026'
+summary: 'Ten seasons of Premier League results, engineered into rolling form features and modelled twice — against a baseline that always guesses the home win.'
+role: 'Solo — data, features, models'
+stack: ['Python', 'pandas', 'scikit-learn', 'XGBoost']
+status: in-progress
+repo: 'https://github.com/U2lu/Premier-League-Prediction-App'
+order: 2
+figures:
+  - alt: 'The engineered feature table: one row per fixture with rolling five-match averages for goals scored, goals conceded and points, for both teams'
+    caption: 'One row per fixture. Six features, all built from matches that happened before it.'
+  - alt: 'Terminal output comparing the baseline, Random Forest and XGBoost on accuracy, balanced accuracy, macro F1 and log loss'
+    caption: 'Every run prints the same four numbers for all three models, side by side.'
+---
+
+## The honest version of the problem
+
+Football has three outcomes and the bookmakers are already very good at them. So the interesting question here is not “can it predict football”. It is: how much signal is actually in six form features, and how would I know if they were worth anything?
+
+That second half is the project. Anyone can fit a model and print an accuracy figure.
+
+## The data
+
+Fixtures from API-Football, ten seasons of the Premier League. The collector is resumable by design: it reads the CSV it already has, works out which seasons are missing, and only fetches those. It de-duplicates on `fixture_id`, keeps only matches that finished with a real score, sorts them chronologically, and raises on an API error rather than writing half a season.
+
+That last detail is not fussiness. A dataset silently missing September is a dataset that will produce a confident, wrong answer later.
+
+## Features
+
+Six numbers per fixture: the rolling five-match average of goals scored, goals conceded and points — for the home team and the away team.
+
+The one decision that matters is `shift(1)`. Each average is computed from the matches *before* the fixture, never including it. Without that shift, the row contains the result it is trying to predict and the model scores beautifully on paper while knowing nothing. Teams with no history get zeros, which is the honest encoding: a newly promoted side in August has no form, and inventing some would leak the season.
+
+The feature builder validates as it goes — required columns present, no duplicate fixtures, `1:1` merges, no team twice on the same date, and the row count unchanged at the end. It would rather fail loudly than train on a broken table.
+
+## Split and baseline
+
+Chronological, not random. Train on seasons up to 2022, test on 2023 onward. A random split on time-ordered data lets the model train on the future, which is a very easy way to look clever.
+
+Then a baseline that always predicts the most common outcome in training. Home wins are roughly 45% of matches, so a model that cannot beat “always home win” has learned nothing — and accuracy alone would hide that, because the baseline itself scores respectably.
+
+So evaluation reports balanced accuracy, macro F1 and log loss alongside it. Log loss is the one that matters for a product: it punishes being confidently wrong, which is exactly the failure that would make a prediction service worthless.
+
+## Two models, on purpose
+
+A Random Forest and an XGBoost, chosen to disagree. Four hundred trees at depth 8 with balanced class weights, against four hundred boosted rounds at depth 4 and a 0.04 learning rate. Both save their feature list and label mapping next to the model file, so a prediction cannot silently use a different column order than training did.
+
+## Where it actually stands
+
+The pipeline runs end to end: collect, prepare, train, evaluate, save. Tuning is not finished.
+
+The metrics from the last run exist only in a terminal I have since closed, which is the first thing to fix and the reason this page has no results table. Numbers you cannot reproduce are decoration.
+
+There is also no service yet. `api.py` in the repo is a one-shot script that fetches one season and prints its first fixture. It is a data probe, not an API, despite the filename.
+
+## What I would change
+
+- **Persist the evaluation.** Write each run's metrics to JSON with the hyperparameters. A model comparison you can't re-read is a model comparison you can't trust.
+- **Get the `.pkl` files out of git.** They are 7 MB and 1.9 MB, they change on every run, and they will bloat the history permanently. Releases or object storage.
+- **Delete the previous generation.** There are two collectors and two match CSVs in the tree. One is the real pipeline; the other is the draft I stopped using. Keeping both makes the repo harder to read than the model is hard to build.
+- **Stop calling draws.** Draws will be the worst class in every report, because a draw is the outcome least explained by form. A real interface should show probabilities and decline to call a match where the top two are close.
+- **Test the shift.** One test asserting that no row's features are derived from that row's own result would protect the single assumption the whole model rests on.

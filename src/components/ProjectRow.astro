@@ -1,36 +1,33 @@
 ---
-import type { WorkItem } from '../data/work';
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
-  item: WorkItem;
+  entry: CollectionEntry<'work'>;
 }
 
-const { item } = Astro.props;
+const { entry } = Astro.props;
+const d = entry.data;
 ---
 
-<a class="row group" href={item.href} rel="noopener" target="_blank">
+<a class="row group" href={`/work/${entry.id}`}>
   <div class="flex items-center gap-3 md:block">
-    <span class="meta">{item.year}</span>
-    {
-      item.status === 'in-progress' && (
-        <span class="pill md:mt-2">In progress</span>
-      )
-    }
+    <span class="meta">{d.year}</span>
+    {d.status === 'in-progress' && <span class="pill md:mt-2">In progress</span>}
   </div>
 
   <div>
-    <h3 class="row-title">{item.title}</h3>
-    <p class="mt-2 max-w-[54ch] text-sm text-[var(--color-fg-soft)]">{item.summary}</p>
+    <h3 class="row-title">{d.title}</h3>
+    <p class="mt-2 max-w-[54ch] text-sm text-[var(--color-fg-soft)]">{d.summary}</p>
     {
-      item.stack && (
+      d.stack.length > 0 && (
         <p class="mt-3 font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-[var(--color-fg-soft)]">
-          {item.stack.join(' · ')}
+          {d.stack.join(' · ')}
         </p>
       )
     }
   </div>
 
   <span class="meta whitespace-nowrap md:text-right">
-    {item.hrefLabel} <span aria-hidden="true">↗</span>
+    Case study <span aria-hidden="true">→</span>
   </span>
 </a>

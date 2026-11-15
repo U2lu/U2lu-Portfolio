@@ -1,12 +1,12 @@
 export interface RailItem {
   title: string;
   meta: string;
+  /** Case study route. Every tile opens its own page. */
   href: string;
   /** Drop a file into public/posters/ and set this to e.g. '/posters/vibesfest-01.avif' */
   image?: string;
   alt?: string;
   tone?: 'wash' | 'paper' | 'ink';
-  external?: boolean;
 }
 
 /**
@@ -17,36 +17,31 @@ export const rail: RailItem[] = [
   {
     title: 'VibesfestNG',
     meta: 'Design · Campaign',
-    href: 'https://www.behance.net/gallery/249724575/VibesfestNG-Projects',
+    href: '/work/vibesfestng',
     tone: 'ink',
-    external: true,
   },
   {
     title: 'Weather App',
     meta: 'Engineering · 2026',
-    href: 'https://github.com/U2lu/Weather-app',
+    href: '/work/weather-app',
     tone: 'wash',
-    external: true,
   },
   {
     title: 'Owerri Sports Club',
     meta: 'Design · Identity',
-    href: 'https://www.behance.net/gallery/249676593/Owerri-Sports-Club',
+    href: '/work/owerri-sports-club',
     tone: 'paper',
-    external: true,
   },
   {
     title: 'Premier League Predictions',
     meta: 'Engineering · In progress',
-    href: 'https://github.com/U2lu/Premier-League-Prediction-App',
+    href: '/work/premier-league-prediction',
     tone: 'wash',
-    external: true,
   },
   {
     title: 'Graphic Posters',
     meta: 'Design · Series',
-    href: 'https://www.behance.net/gallery/249749543/Graphic-Posters',
+    href: '/work/graphic-posters',
     tone: 'paper',
-    external: true,
   },
 ];
