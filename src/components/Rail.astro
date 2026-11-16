@@ -39,7 +39,13 @@ import { rail } from '../data/rail';
             <a class="tile-link group" href={item.href}>
               <div class:list={['tile-panel', `tile-panel--${item.tone ?? 'wash'}`]}>
                 {item.image ? (
-                  <img src={item.image} alt={item.alt ?? item.title} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+                  <img
+                    src={item.image}
+                    alt={item.alt ?? item.title}
+                    loading={i < 2 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    draggable="false"
+                  />
                 ) : (
                   <div class="tile-type">
                     <span class="meta">{String(i + 1).padStart(2, '0')}</span>
@@ -135,26 +141,38 @@ import { rail } from '../data/rail';
     };
 
     /* ---- drag to scroll, so a mouse user is never stuck ---- */
+    // Capture is deferred until the pointer has actually moved. Capturing on
+    // pointerdown retargets the following click to this element, so the tile
+    // links never see it and nothing navigates.
+    const DRAG_THRESHOLD = 5;
+
     let dragging = false;
-    let moved = 0;
+    let suppressClick = false;
     let startX = 0;
     let startScroll = 0;
 
     rail.addEventListener('pointerdown', (e) => {
       // Touch already scrolls natively; dragging it by hand fights the browser.
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      dragging = true;
-      moved = 0;
+      dragging = false;
+      suppressClick = false;
       startX = e.clientX;
       startScroll = rail.scrollLeft;
-      rail.setPointerCapture(e.pointerId);
-      rail.classList.add('is-dragging');
     });
 
     rail.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
+      if (e.pointerType !== 'mouse' || e.buttons !== 1) return;
+
       const dx = e.clientX - startX;
-      moved = Math.max(moved, Math.abs(dx));
+
+      if (!dragging) {
+        if (Math.abs(dx) < DRAG_THRESHOLD) return;
+        dragging = true;
+        rail.setPointerCapture(e.pointerId);
+        rail.classList.add('is-dragging');
+      }
+
+      suppressClick = true;
       rail.scrollLeft = startScroll - dx;
     });
 
@@ -171,11 +189,10 @@ import { rail } from '../data/rail';
     rail.addEventListener(
       'click',
       (e) => {
-        if (moved > 6) {
-          e.preventDefault();
-          e.stopPropagation();
-          moved = 0;
-        }
+        if (!suppressClick) return;
+        e.preventDefault();
+        e.stopPropagation();
+        suppressClick = false;
       },
       true
     );
