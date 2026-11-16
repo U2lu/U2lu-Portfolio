@@ -9,10 +9,9 @@ status: in-progress
 repo: 'https://github.com/U2lu/Weather-app'
 order: 1
 figures:
-  - alt: 'Weather app showing current conditions for one city'
-    caption: 'One city, one panel. Everything else is secondary.'
-  - alt: 'Weather app showing the forecast list beneath the current conditions'
-    caption: 'Forecast below the fold, so the current reading never competes with it.'
+  - src: '/shots/weather-01.webp'
+    alt: 'The weather app in a desktop browser: current conditions for Lagos at 26.63 degrees beside a blurred coastal photograph, with a five-day forecast list on the right'
+    caption: 'Current conditions on the left, the forecast list on the right.'
 ---
 
 ## The brief
@@ -33,9 +32,9 @@ Search is submit-only. The panel only changes when you ask for a city, which rem
 
 Both fetches check `response.ok` and throw on a non-2xx, so the component never receives half an error object. The panel renders fallbacks rather than crashing when a field is missing, and all the state lives in one place — the child components are presentational. The search bar does not know what a forecast is.
 
-## What I would change
+## What’s next
 
-- The condition icon is still requested over `http://`, which will be blocked as mixed content the moment this is served over https. Ten-second fix I have not made.
-- Errors only reach the console. A visible error state is the entire reason this project exists.
-- Requests are not cancelled. A slow response for the previous city can still land after a new one.
-- No tests. The state machine is small enough that three or four would cover it.
+- **Serve the icons over https.** They are still requested over `http://`, which browsers block as mixed content the moment the app is deployed.
+- **Surface errors in the interface.** Failures currently go to the console. A visible error state is the next thing to build, and the reason the project exists at all.
+- **Cancel stale requests.** A slow response for the previous city can still land after a new one and overwrite the panel. An `AbortController` on the in-flight request closes that.
+- **A few tests.** Three or four around the fetch and error paths would cover the whole state machine.

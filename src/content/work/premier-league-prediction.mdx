@@ -68,7 +68,7 @@ A Random Forest and an XGBoost, chosen to disagree. Four hundred trees at depth 
 
 Balanced accuracy is the column that separates them. 0.333 is exactly what a model that never predicts a draw or an away win looks like; 0.437 is a model that is genuinely splitting three ways. Macro F1 nearly doubles, 0.20 to 0.43. The Random Forest is not just leaning harder on the favourite.
 
-**48% is still wrong more often than right.** As a betting product this is worthless and I would say so to anyone who asked. What it shows is narrower and true: six form features carry a small, measurable amount of signal about a match result.
+**48% is still wrong more often than right.** This is not a betting product — at 48% it would lose money, and I would say that to anyone who asked. What it shows is narrower and true: six form features carry a small, measurable amount of signal about a match result.
 
 **The Random Forest wins, which I did not expect.** XGBoost is behind on all four metrics. Boosting is not automatically better — with 3,040 training rows and six features, a bagged forest with balanced class weights has more to regularise against than 400 boosted rounds do.
 
@@ -100,15 +100,15 @@ The pipeline runs end to end: collect, prepare, train, evaluate, save, and the n
 
 Two seasons is also a small test set. On 760 matches, three or four points of that gap could be fixture-list luck rather than signal — the balanced-accuracy jump is the part that is much harder to explain away.
 
-Those numbers are on this page because I typed them in from a terminal. That is the fragility described below — a result you have to copy by hand is a result that will drift out of date and nobody will notice.
+Those numbers are on this page because I typed them in from a terminal, which is the one thing on this list a JSON file would fix.
 
 There is no service yet, either. `api.py` in the repo is a one-shot script that fetches one season and prints its first fixture. It is a data probe, not an API, despite the filename.
 
-## What I would change
+## What’s next
 
-- **Persist the evaluation.** Write each run's metrics to JSON alongside the hyperparameters. These numbers are hand-copied; the next run will produce different ones and nothing will record the difference.
+- **Persist the evaluation.** Write each run's metrics to JSON alongside its hyperparameters, so the table above regenerates instead of being typed in.
 - **Close the calibration gap before showing any probability.** The forest ranks outcomes better than it estimates their likelihood. Recalibrate, or ship a lean-only interface — never a percentage it cannot defend.
-- **The feature ceiling is six rolling averages.** Elo, expected goals, days of rest, and home/away splits are the obvious next inputs. The calibration result says the next gain has to come from somewhere other than form.
-- **Get the `.pkl` files out of git.** They are 7 MB and 1.9 MB, they change on every run, and they will bloat the history permanently. Releases or object storage.
-- **Delete the previous generation.** There are two collectors and two match CSVs in the tree. One is the real pipeline; the other is the draft I stopped using. Keeping both makes the repo harder to read than the model is hard to build.
+- **Push past six rolling averages.** Elo, expected goals, days of rest and home/away splits are the obvious next inputs. The calibration result says the next gain has to come from somewhere other than form.
+- **Move the model files out of git.** They are 7 MB and 1.9 MB, they change on every run, and releases or object storage are the right home for them.
+- **Retire the earlier pipeline.** There are two collectors and two match CSVs in the tree; one is the live pipeline and the other is a draft. Removing the draft makes the repo read the way the model is built.
 - **Test the shift.** One test asserting that no row's features are derived from that row's own result would protect the single assumption the whole model rests on.

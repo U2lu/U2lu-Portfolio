@@ -3,7 +3,7 @@ export interface RailItem {
   meta: string;
   /** Case study route. Every tile opens its own page. */
   href: string;
-  /** Drop a file into public/posters/ and set this to e.g. '/posters/vibesfest-01.avif' */
+  /** Artwork for the tile. Engineering items stay typographic on purpose. */
   image?: string;
   alt?: string;
   tone?: 'wash' | 'paper' | 'ink';
@@ -16,8 +16,10 @@ export interface RailItem {
 export const rail: RailItem[] = [
   {
     title: 'VibesfestNG',
-    meta: 'Design · Campaign',
+    meta: 'Design · 2025',
     href: '/work/vibesfestng',
+    image: '/shots/vibesfestng-01-flyer.webp',
+    alt: 'VibesfestNG announcement flyer, artists cut out on a yellow field',
     tone: 'ink',
   },
   {
@@ -28,8 +30,10 @@ export const rail: RailItem[] = [
   },
   {
     title: 'Owerri Sports Club',
-    meta: 'Design · Identity',
+    meta: 'Design · 2025–26',
     href: '/work/owerri-sports-club',
+    image: '/shots/owerri-01-adults.webp',
+    alt: 'Adults Party flier for Owerri Sports Club',
     tone: 'paper',
   },
   {
@@ -42,6 +46,8 @@ export const rail: RailItem[] = [
     title: 'Graphic Posters',
     meta: 'Design · Series',
     href: '/work/graphic-posters',
+    image: '/shots/posters-03-pastures.webp',
+    alt: 'PASTURES poster from the graphic poster series',
     tone: 'paper',
   },
 ];

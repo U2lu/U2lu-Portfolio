@@ -85,8 +85,9 @@ const allPosters = d.figures.length > 0 && d.figures.every((f) => f.kind === 'po
           <ul
             role="list"
             class:list={[
-              'grid gap-x-8 gap-y-10',
-              allPosters ? 'sm:grid-cols-2' : 'grid-cols-1',
+              allPosters
+                ? 'columns-1 gap-8 sm:columns-2 [&>li]:mb-10 [&>li]:break-inside-avoid'
+                : 'grid grid-cols-1 gap-y-10',
             ]}
           >
             {d.figures.map((fig, i) => (
