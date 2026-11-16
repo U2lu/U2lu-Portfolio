@@ -40,7 +40,9 @@ Node 20.3 or newer. The build is fully static; `dist/` is the whole site.
 4. Set `draft: true` to keep a file out of every index.
 
 It appears on `/work`, on `/design` if it is design, on the homepage rail if it
-is listed in `rail.ts`, and in the sitemap. Nothing else needs editing.
+is listed in `rail.ts`, and in the sitemap. Two things are written by hand: the
+homepage rail order, and the count in the `/work` headline ("Five things,
+chosen."), which has to change when the set does.
 
 ## Deploy
 
