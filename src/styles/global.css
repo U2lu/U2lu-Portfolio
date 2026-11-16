@@ -465,6 +465,52 @@
     border-top: 1px solid var(--color-rule);
     margin-block: 2.5rem;
   }
+  /* Data tables: numbers right-aligned and tabular, so columns compare */
+  .table-wrap {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+  .prose table {
+    width: 100%;
+    min-width: 24rem;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+  }
+  .prose thead th {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-fg-soft);
+    text-align: left;
+    padding: 0 0 0.6rem;
+    border-bottom: 1px solid var(--color-rule);
+    vertical-align: bottom;
+  }
+  .prose tbody th,
+  .prose tbody td {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--color-rule-soft);
+    font-weight: 400;
+    text-align: left;
+    line-height: 1.35;
+  }
+  .prose tbody th {
+    color: var(--color-fg);
+    padding-right: 1.5rem;
+  }
+  .prose tbody td {
+    color: var(--color-fg-soft);
+  }
+  .prose thead th:not(:first-child),
+  .prose tbody td:not(:first-child) {
+    text-align: right;
+    padding-left: 0.75rem;
+    white-space: nowrap;
+  }
 
   /* Section headers share the row grid so the left edge never goes ragged */
   .section-head {

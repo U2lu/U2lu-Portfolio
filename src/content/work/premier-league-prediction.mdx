@@ -39,7 +39,7 @@ The feature builder validates as it goes — required columns present, no duplic
 
 Chronological, not random. Train on seasons up to 2022, test on 2023 onward. A random split on time-ordered data lets the model train on the future, which is a very easy way to look clever.
 
-Then a baseline that always predicts the most common outcome in training. Home wins are roughly 45% of matches, so a model that cannot beat “always home win” has learned nothing — and accuracy alone would hide that, because the baseline itself scores respectably.
+Then a baseline that always predicts the most common outcome in training. Home wins are about 43% of matches, so a model that cannot beat “always home win” has learned nothing — and accuracy alone would hide that, because the baseline itself scores respectably.
 
 So evaluation reports balanced accuracy, macro F1 and log loss alongside it. Log loss is the one that matters for a product: it punishes being confidently wrong, which is exactly the failure that would make a prediction service worthless.
 
@@ -47,18 +47,66 @@ So evaluation reports balanced accuracy, macro F1 and log loss alongside it. Log
 
 A Random Forest and an XGBoost, chosen to disagree. Four hundred trees at depth 8 with balanced class weights, against four hundred boosted rounds at depth 4 and a 0.04 learning rate. Both save their feature list and label mapping next to the model file, so a prediction cannot silently use a different column order than training did.
 
+## The result
+
+760 matches from 2023 and 2024, none of them seen during training.
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th scope="col">Model</th><th scope="col">Accuracy</th><th scope="col">Balanced acc.</th><th scope="col">Macro F1</th><th scope="col">Log loss</th></tr>
+    </thead>
+    <tbody>
+      <tr><th scope="row">Baseline — always home</th><td>0.434</td><td>0.333</td><td>0.202</td><td>20.393</td></tr>
+      <tr><th scope="row">Random Forest</th><td>0.478</td><td>0.437</td><td>0.430</td><td>1.058</td></tr>
+      <tr><th scope="row">XGBoost</th><td>0.463</td><td>0.392</td><td>0.356</td><td>1.069</td></tr>
+    </tbody>
+  </table>
+</div>
+
+**It beats the baseline, and not by accident.** Accuracy is the least interesting column here. The baseline's 43.4% is not a skill score — it is the base rate. 330 of the 760 test matches were home wins, so “always home” gets 43% for free.
+
+Balanced accuracy is the column that separates them. 0.333 is exactly what a model that never predicts a draw or an away win looks like; 0.437 is a model that is genuinely splitting three ways. Macro F1 nearly doubles, 0.20 to 0.43. The Random Forest is not just leaning harder on the favourite.
+
+**48% is still wrong more often than right.** As a betting product this is worthless and I would say so to anyone who asked. What it shows is narrower and true: six form features carry a small, measurable amount of signal about a match result.
+
+**The Random Forest wins, which I did not expect.** XGBoost is behind on all four metrics. Boosting is not automatically better — with 3,040 training rows and six features, a bagged forest with balanced class weights has more to regularise against than 400 boosted rounds do.
+
+**Draws are where both of them fail.**
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th scope="col">F1 by outcome</th><th scope="col">Draw (175)</th><th scope="col">Home win (330)</th><th scope="col">Away win (255)</th></tr>
+    </thead>
+    <tbody>
+      <tr><th scope="row">Random Forest</th><td>0.22</td><td>0.55</td><td>0.52</td></tr>
+      <tr><th scope="row">XGBoost</th><td>0.05</td><td>0.58</td><td>0.44</td></tr>
+    </tbody>
+  </table>
+</div>
+
+XGBoost finds 5 of the 175 draws in the test set. The Random Forest — the weaker of the two on home and away wins — finds 31. That is not a bug in the code; it is what a global log-loss objective does when one class is the least separable, buying accuracy by abandoning that class entirely. `class_weight="balanced"` is the reason the forest keeps looking for draws at all, and the clearest sign the weighting was the right call.
+
+**And this is the number worth keeping.** A model that outputs the training base rates for every single match would score a log loss equal to the entropy of the class distribution — roughly 1.067 on this test set. The Random Forest scores 1.058.
+
+Its probabilities are within one percent of saying “home win, 43%” every time.
+
+So the model has learned which way to lean, and has not learned how confident to be. A screen showing “63% home win” from this model would be lying to whoever read it. That gap is the real argument for not shipping probabilities yet — and XGBoost's 1.069, worse than the constant, is the same failure with a smaller footprint.
+
 ## Where it actually stands
 
-The pipeline runs end to end: collect, prepare, train, evaluate, save. Tuning is not finished.
+The pipeline runs end to end: collect, prepare, train, evaluate, save, and the numbers above come out of it. Tuning is not finished.
 
-The metrics from the last run exist only in a terminal I have since closed, which is the first thing to fix and the reason this page has no results table. Numbers you cannot reproduce are decoration.
+Those numbers are on this page because I typed them in from a terminal. That is the fragility described below — a result you have to copy by hand is a result that will drift out of date and nobody will notice.
 
-There is also no service yet. `api.py` in the repo is a one-shot script that fetches one season and prints its first fixture. It is a data probe, not an API, despite the filename.
+There is no service yet, either. `api.py` in the repo is a one-shot script that fetches one season and prints its first fixture. It is a data probe, not an API, despite the filename.
 
 ## What I would change
 
-- **Persist the evaluation.** Write each run's metrics to JSON with the hyperparameters. A model comparison you can't re-read is a model comparison you can't trust.
+- **Persist the evaluation.** Write each run's metrics to JSON alongside the hyperparameters. These numbers are hand-copied; the next run will produce different ones and nothing will record the difference.
+- **Close the calibration gap before showing any probability.** The forest ranks outcomes better than it estimates their likelihood. Recalibrate, or ship a lean-only interface — never a percentage it cannot defend.
+- **The feature ceiling is six rolling averages.** Elo, expected goals, days of rest, and home/away splits are the obvious next inputs. The calibration result says the next gain has to come from somewhere other than form.
 - **Get the `.pkl` files out of git.** They are 7 MB and 1.9 MB, they change on every run, and they will bloat the history permanently. Releases or object storage.
 - **Delete the previous generation.** There are two collectors and two match CSVs in the tree. One is the real pipeline; the other is the draft I stopped using. Keeping both makes the repo harder to read than the model is hard to build.
-- **Stop calling draws.** Draws will be the worst class in every report, because a draw is the outcome least explained by form. A real interface should show probabilities and decline to call a match where the top two are close.
 - **Test the shift.** One test asserting that no row's features are derived from that row's own result would protect the single assumption the whole model rests on.
