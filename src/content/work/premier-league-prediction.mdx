@@ -98,6 +98,8 @@ So the model has learned which way to lean, and has not learned how confident to
 
 The pipeline runs end to end: collect, prepare, train, evaluate, save, and the numbers above come out of it. Tuning is not finished.
 
+Two seasons is also a small test set. On 760 matches, three or four points of that gap could be fixture-list luck rather than signal — the balanced-accuracy jump is the part that is much harder to explain away.
+
 Those numbers are on this page because I typed them in from a terminal. That is the fragility described below — a result you have to copy by hand is a result that will drift out of date and nobody will notice.
 
 There is no service yet, either. `api.py` in the repo is a one-shot script that fetches one season and prints its first fixture. It is a data probe, not an API, despite the filename.
