@@ -1,0 +1,15 @@
+# Cloudflare Pages reads this file. Astro fingerprints JS and CSS in /_astro/,
+# so those can be cached forever; artwork keeps its filename and cannot.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/shots/*
+  Cache-Control: public, max-age=604800
+
+/favicon.svg
+  Cache-Control: public, max-age=604800
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=()

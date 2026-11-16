@@ -2,16 +2,60 @@
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="Not found — Emmanuel Utulu" description="That page doesn’t exist.">
-  <section class="page flex min-h-[60vh] flex-col justify-center py-20">
-    <p class="meta">404</p>
-    <h1 class="display-line mt-6 max-w-[16ch]">This page shipped without its route.</h1>
-    <p class="mt-6 max-w-[48ch] text-lg text-[var(--color-fg-soft)]">
-      The link is broken, or I moved something and forgot to redirect it. Both are on me.
+<Base
+  title="Not found — Emmanuel Utulu"
+  description="That address doesn’t exist. Everything I’ve made is one link away."
+  noindex
+>
+  <section class="page pt-14 md:pt-24">
+    <p class="meta">Error 404</p>
+    <h1 class="display-line mt-6 max-w-[18ch]">Nothing at this address.</h1>
+
+    <p class="mt-8 max-w-[46ch] text-lg text-[var(--color-fg-soft)]">
+      The page moved, or it never existed. Either way the work is still here — five case studies,
+      a wall of posters, and a way to reach me.
     </p>
-    <div class="mt-8 flex flex-wrap gap-3">
-      <a class="btn btn-primary" href="/">Back home</a>
-      <a class="btn btn-ghost" href="/work">See the work</a>
-    </div>
+
+    <ul role="list" class="mt-12 grid max-w-2xl gap-px border-t border-[var(--color-rule-soft)]">
+      <li>
+        <a
+          href="/work"
+          class="group flex items-baseline justify-between gap-6 border-b border-[var(--color-rule-soft)] py-5"
+        >
+          <span class="display-line text-2xl">Work</span>
+          <span class="meta transition-colors group-hover:text-[var(--color-accent-text)]">
+            Five pieces →
+          </span>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/design"
+          class="group flex items-baseline justify-between gap-6 border-b border-[var(--color-rule-soft)] py-5"
+        >
+          <span class="display-line text-2xl">Design</span>
+          <span class="meta transition-colors group-hover:text-[var(--color-accent-text)]">
+            Posters →
+          </span>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/"
+          class="group flex items-baseline justify-between gap-6 border-b border-[var(--color-rule-soft)] py-5"
+        >
+          <span class="display-line text-2xl">Home</span>
+          <span class="meta transition-colors group-hover:text-[var(--color-accent-text)]">
+            Start again →
+          </span>
+        </a>
+      </li>
+    </ul>
+
+    <p class="mt-10 text-sm text-[var(--color-fg-soft)]">
+      Something broken? Write to{' '}
+      <a class="link-underline" href="mailto:ayoutulu@gmail.com">ayoutulu@gmail.com</a> and I’ll fix
+      the link.
+    </p>
   </section>
 </Base>
