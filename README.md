@@ -46,12 +46,20 @@ chosen."), which has to change when the set does.
 
 ## Deploy
 
-Cloudflare Pages, connected to this repository.
+Live at **https://u2lu.ayoutulu.workers.dev** — a Cloudflare Worker serving
+`dist/` as static assets.
 
-- Project name: `u2lu` → the site lives at `https://u2lu.pages.dev`
-- Build command: `npm run build`
-- Output directory: `dist`
-- Environment variable: `NODE_VERSION=22`
+```sh
+npm run build
+npx wrangler deploy
+```
 
-`astro.config.mjs` holds the canonical URL in `site`. Changing the domain is one
-line there, plus `public/robots.txt`.
+The first deploy on a machine needs `npx wrangler login` once.
+
+`wrangler.jsonc` sets `not_found_handling: "404-page"`, which is what makes an
+unknown URL return `404.html` with a 404 status. Without that setting
+Cloudflare answers with an empty 404 instead.
+
+`astro.config.mjs` holds the canonical URL in `site` — the source for the
+sitemap, every canonical tag and the absolute OG image URL. Changing the domain
+is one line there, plus the sitemap line in `public/robots.txt`.
