@@ -1,4 +1,4 @@
-﻿User-agent: *
+User-agent: *
 Allow: /
 
-Sitemap: https://u2lu.ayoutulu.workers.dev/sitemap-index.xml
+Sitemap: https://u2lu.pages.dev/sitemap-index.xml
