@@ -80,12 +80,10 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
 
     <header class="border-b border-[var(--color-rule-soft)]">
       <div class="page flex items-center justify-between gap-4 py-4 md:gap-6 md:py-5">
-        <a href="/" class="group flex items-baseline gap-3">
+        <a href="/" class="inline-block" aria-label="U2LU — Emmanuel Utulu, home">
           <span class="font-display text-xl leading-none tracking-tight md:text-2xl">
             U<span class="text-[var(--color-accent-text)]">2</span>LU
           </span>
-          <span class="meta hidden sm:inline">Emmanuel Utulu</span>
-          <span class="sr-only">— home</span>
         </a>
 
         <nav aria-label="Primary" class="flex items-center gap-3 md:gap-7">
@@ -125,7 +123,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     </main>
 
     <footer class="mt-24 border-t border-[var(--color-rule-soft)]">
-      <div class="page grid gap-10 py-12 md:grid-cols-[1.2fr_1fr_1fr] md:py-16">
+      <div class="page grid gap-10 py-12 md:grid-cols-[1.4fr_1fr] md:py-16">
         <div>
           <p class="display-line text-3xl md:text-4xl">Let’s make something.</p>
           <a
@@ -162,14 +160,6 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
             </li>
           </ul>
         </nav>
-
-        <div class="text-sm text-[var(--color-fg-soft)]">
-          <p class="meta mb-3">This site</p>
-          <p>
-            Built with Astro. Pre-rendered HTML, no trackers, no consent banner. Green is
-            <span class="font-mono text-xs">#006400</span>.
-          </p>
-        </div>
       </div>
       <div class="page flex flex-wrap items-center justify-between gap-2 border-t border-[var(--color-rule-soft)] py-5">
         <p class="meta">© {new Date().getFullYear()} Emmanuel Utulu</p>
@@ -178,36 +168,40 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     </footer>
 
     <script is:inline>
-      const root = document.documentElement;
-      const btn = document.getElementById('theme-toggle');
-      const themeColors = { light: '#f4f3ee', dark: '#0a0f0a' };
-      const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const current = () =>
-        root.dataset.theme ||
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      // Inline scripts share one global scope, so every one of them is wrapped:
+      // a page script that also names `btn` would otherwise kill this listener.
+      (() => {
+        const root = document.documentElement;
+        const btn = document.getElementById('theme-toggle');
+        const themeColors = { light: '#f4f3ee', dark: '#0a0f0a' };
+        const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const current = () =>
+          root.dataset.theme ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-      const paint = (theme) => {
-        root.dataset.theme = theme;
-        // Both metas take the chosen colour, so the active one matches the
-        // page whichever OS preference the browser evaluated.
-        themeMetas.forEach((meta) => meta.setAttribute('content', themeColors[theme]));
-      };
+        const paint = (theme) => {
+          root.dataset.theme = theme;
+          // Both metas take the chosen colour, so the active one matches the
+          // page whichever OS preference the browser evaluated.
+          themeMetas.forEach((meta) => meta.setAttribute('content', themeColors[theme]));
+        };
 
-      btn?.addEventListener('click', () => {
-        const next = current() === 'dark' ? 'light' : 'dark';
-        if (document.startViewTransition && !reduced.matches && document.visibilityState === 'visible') {
-          document.startViewTransition(() => paint(next));
-        } else {
-          paint(next);
-        }
-        try {
-          localStorage.setItem('u2lu-theme', next);
-        } catch {}
-        btn.setAttribute('aria-label', `Switch to ${next === 'dark' ? 'light' : 'dark'} theme`);
-      });
+        btn?.addEventListener('click', () => {
+          const next = current() === 'dark' ? 'light' : 'dark';
+          if (document.startViewTransition && !reduced.matches && document.visibilityState === 'visible') {
+            document.startViewTransition(() => paint(next));
+          } else {
+            paint(next);
+          }
+          try {
+            localStorage.setItem('u2lu-theme', next);
+          } catch {}
+          btn.setAttribute('aria-label', `Switch to ${next === 'dark' ? 'light' : 'dark'} theme`);
+        });
 
-      if (btn) btn.setAttribute('aria-label', `Switch to ${current() === 'dark' ? 'light' : 'dark'} theme`);
+        if (btn) btn.setAttribute('aria-label', `Switch to ${current() === 'dark' ? 'light' : 'dark'} theme`);
+      })();
     </script>
   </body>
 </html>

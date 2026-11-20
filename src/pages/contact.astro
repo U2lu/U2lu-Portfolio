@@ -65,16 +65,19 @@ import Base from '../layouts/Base.astro';
   </section>
 
   <script is:inline>
-    const btn = document.getElementById('copy-email');
-    const status = document.getElementById('copy-status');
-    btn?.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(btn.dataset.email);
-        status.textContent = 'Copied';
-      } catch {
-        status.textContent = 'Copy failed — the address is above';
-      }
-      setTimeout(() => (status.textContent = ''), 3500);
-    });
+    // Wrapped so this page's names cannot collide with the layout's scripts.
+    (() => {
+      const copyButton = document.getElementById('copy-email');
+      const status = document.getElementById('copy-status');
+      copyButton?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(copyButton.dataset.email);
+          status.textContent = 'Copied';
+        } catch {
+          status.textContent = 'Copy failed — the address is above';
+        }
+        setTimeout(() => (status.textContent = ''), 3500);
+      });
+    })();
   </script>
 </Base>
