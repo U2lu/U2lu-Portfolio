@@ -5,15 +5,20 @@ year: '2026'
 summary: 'A single-city weather app built to survive the parts that normally break: a slow request, a city that does not exist, and an API that answers with an error instead of data.'
 role: 'Solo — design and build'
 stack: ['React', 'TypeScript', 'Vite', 'OpenWeather API']
-status: in-progress
+live: 'https://weather-app.ayoutulu.workers.dev/'
 repo: 'https://github.com/U2lu/Weather-app'
 order: 1
 figures:
   - src: '/shots/weather-01.webp'
-    width: 1200
-    height: 592
-    alt: 'The weather app in a desktop browser: current conditions for Lagos at 26.63 degrees beside a blurred coastal photograph, with a five-day forecast list on the right'
-    caption: 'Current conditions on the left, the forecast list on the right.'
+    width: 1234
+    height: 917
+    alt: 'The weather app for Lagos at 37 degrees: conditions and a cliffside town at dusk fill the left half, humidity, wind and a five-day forecast fill the right'
+    caption: 'Lagos, loaded. Conditions and the photograph on the left; details and the week on the right.'
+  - src: '/shots/weather-02.webp'
+    width: 1234
+    height: 917
+    alt: 'The same app after a search for Xyzzy: a rose-coloured alert says it could not load the weather for Xyzzy, while the city panel shows its empty state'
+    caption: 'The error state. It names the city you asked for and says what to try next.'
 ---
 
 ## The brief
@@ -34,9 +39,9 @@ Search is submit-only. The panel only changes when you ask for a city, which rem
 
 Both fetches check `response.ok` and throw on a non-2xx, so the component never receives half an error object. The panel renders fallbacks rather than crashing when a field is missing, and all the state lives in one place — the child components are presentational. The search bar does not know what a forecast is.
 
+A failed request no longer disappears into the console. It becomes an alert that names the city you asked for and tells you what to try next.
+
 ## What’s next
 
-- **Serve the icons over https.** They are still requested over `http://`, which browsers block as mixed content the moment the app is deployed.
-- **Surface errors in the interface.** Failures currently go to the console. A visible error state is the next thing to build, and the reason the project exists at all.
 - **Cancel stale requests.** A slow response for the previous city can still land after a new one and overwrite the panel. An `AbortController` on the in-flight request closes that.
 - **A few tests.** Three or four around the fetch and error paths would cover the whole state machine.
