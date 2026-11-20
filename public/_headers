@@ -6,6 +6,9 @@
 /shots/*
   Cache-Control: public, max-age=604800
 
+/*.webp
+  Cache-Control: public, max-age=604800
+
 /favicon.svg
   Cache-Control: public, max-age=604800
 
