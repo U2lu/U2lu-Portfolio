@@ -97,8 +97,8 @@ const allPosters = d.figures.length > 0 && d.figures.every((f) => f.kind === 'po
                     <img
                       src={fig.src}
                       alt={fig.alt}
-                      width="1600"
-                      height={fig.kind === 'poster' ? '2000' : '1000'}
+                      width={fig.width}
+                      height={fig.height}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       decoding="async"
                       class="h-auto w-full border border-[var(--color-rule-soft)]"

@@ -14,19 +14,17 @@ import Base from '../layouts/Base.astro';
   <section class="page mt-14 grid gap-12 md:mt-20 md:grid-cols-[1fr_1.15fr] md:gap-20">
     <div>
       <div
-        class="relative aspect-[4/5] w-full max-w-sm overflow-hidden border border-[var(--color-green-deep)] bg-[var(--color-green-deep)] text-[var(--color-paper)]"
+        class="relative aspect-[4/5] w-full max-w-sm overflow-hidden border border-[var(--color-green-deep)] bg-[var(--color-wash)]"
       >
-        <div class="flex h-full flex-col justify-between p-5">
-          <span class="font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-[var(--color-green-lift)]">
-            U2LU
-          </span>
-          <span class="font-display leading-[0.78] tracking-tight" style="font-size: clamp(4.5rem, 11vw, 7.5rem);">
-            EU
-          </span>
-          <span class="font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-[var(--color-green-lift)]">
-            Lagos · Nigeria
-          </span>
-        </div>
+        <img
+          src="/emmanuel-utulu.webp"
+          alt="Emmanuel Utulu at the Owerri NXT conference, in glasses and a patterned sweater vest, with a guest badge on a lanyard"
+          width="840"
+          height="1050"
+          loading="eager"
+          decoding="async"
+          class="h-full w-full object-cover"
+        />
       </div>
       <dl class="mt-8 space-y-4 text-sm">
         <div class="flex justify-between gap-6 border-t border-[var(--color-rule-soft)] pt-3">
@@ -72,7 +70,7 @@ import Base from '../layouts/Base.astro';
           class="btn btn-ghost"
           href="https://www.linkedin.com/in/emmanuel-utulu/"
           rel="noopener"
-          target="_blank">LinkedIn ↗</a
+          target="_blank">LinkedIn <span aria-hidden="true">↗</span></a
         >
       </div>
       <p class="meta pt-2">CV — being updated. Ask me for the current version.</p>

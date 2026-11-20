@@ -5,6 +5,9 @@ export interface RailItem {
   href: string;
   /** Artwork for the tile. Engineering items stay typographic on purpose. */
   image?: string;
+  /** Intrinsic size of `image`, so the browser reserves the right box. */
+  width?: number;
+  height?: number;
   alt?: string;
   tone?: 'wash' | 'paper' | 'ink';
 }
@@ -19,6 +22,8 @@ export const rail: RailItem[] = [
     meta: 'Design · 2025',
     href: '/work/vibesfestng',
     image: '/shots/vibesfestng-01-flyer.webp',
+    width: 1080,
+    height: 1350,
     alt: 'VibesfestNG announcement flyer, artists cut out on a yellow field',
     tone: 'ink',
   },
@@ -33,6 +38,8 @@ export const rail: RailItem[] = [
     meta: 'Design · 2025–26',
     href: '/work/owerri-sports-club',
     image: '/shots/owerri-01-adults.webp',
+    width: 1080,
+    height: 1080,
     alt: 'Adults Party flier for Owerri Sports Club',
     tone: 'paper',
   },
@@ -47,6 +54,8 @@ export const rail: RailItem[] = [
     meta: 'Design · Series',
     href: '/work/graphic-posters',
     image: '/shots/posters-03-pastures.webp',
+    width: 1200,
+    height: 1500,
     alt: 'PASTURES poster from the graphic poster series',
     tone: 'paper',
   },

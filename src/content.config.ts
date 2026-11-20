@@ -2,13 +2,20 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
-const figure = z.object({
-  /** Path under /public, e.g. '/shots/weather-01.avif'. Leave out to render a placeholder. */
-  src: z.string().optional(),
-  alt: z.string(),
-  caption: z.string().optional(),
-  kind: z.enum(['screenshot', 'render', 'poster']).default('screenshot'),
-});
+const figure = z
+  .object({
+    /** Path under /public, e.g. '/shots/weather-01.avif'. Leave out to render a placeholder. */
+    src: z.string().optional(),
+    alt: z.string(),
+    caption: z.string().optional(),
+    kind: z.enum(['screenshot', 'render', 'poster']).default('screenshot'),
+    /** Intrinsic pixel size, so the browser reserves the right box before the image decodes. */
+    width: z.number().int().positive().optional(),
+    height: z.number().int().positive().optional(),
+  })
+  .refine((f) => !f.src || (f.width !== undefined && f.height !== undefined), {
+    message: 'width and height are required when a figure has a src',
+  });
 
 const work = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/work' }),

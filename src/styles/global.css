@@ -33,6 +33,7 @@
   --color-accent-text: #006400;
   --color-btn: #006400;
   --color-btn-fg: #f4f3ee;
+  --color-btn-hover: #005200;
 
   --font-display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
@@ -62,11 +63,13 @@
     --color-accent-text: #5ce08a;
     --color-btn: #5ce08a;
     --color-btn-fg: #0a0f0a;
+    --color-btn-hover: #74e89c;
     --color-wash: #16301f;
   }
 }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --color-bg: #0a0f0a;
   --color-surface: #141a12;
   --color-fg: #f2f1ec;
@@ -77,13 +80,25 @@
   --color-accent-text: #5ce08a;
   --color-btn: #5ce08a;
   --color-btn-fg: #0a0f0a;
+  --color-btn-hover: #74e89c;
   --color-wash: #16301f;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 @layer base {
   html {
+    color-scheme: light dark;
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
   }
 
   body {
@@ -223,20 +238,21 @@
     font-size: var(--text-sm);
     line-height: 1;
     transition:
-      transform 180ms var(--ease-soft),
+      transform 200ms var(--ease-soft),
       background-color 180ms var(--ease-soft),
       border-color 180ms var(--ease-soft),
       color 180ms var(--ease-soft);
   }
   .btn:active {
-    transform: translateY(1px);
+    transform: scale(0.97);
+    transition-duration: 100ms;
   }
   .btn-primary {
     background: var(--color-btn);
     color: var(--color-btn-fg);
   }
   .btn-primary:hover {
-    filter: brightness(1.08);
+    background: var(--color-btn-hover);
   }
   .btn-ghost {
     border: 1px solid var(--color-rule);
@@ -254,6 +270,17 @@
     background: var(--color-accent);
   }
 
+  /* 32px visual, 44px hit area — the control stays quiet in the header. */
+  #theme-toggle {
+    position: relative;
+  }
+  #theme-toggle::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 999px;
+  }
+
   /* ---- Poster rail -------------------------------------------------
      Native horizontal scroll. Drag-to-scroll for mouse users, arrow
      buttons for keyboard, snap for touch. The skew is the only
@@ -262,18 +289,22 @@
   .rail {
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
     scroll-padding-inline: clamp(1.25rem, 5vw, 4rem);
     scrollbar-width: none;
     cursor: grab;
     user-select: none;
+  }
+  /* Snap is for fingers; a mouse flick should not be yanked back to a tile. */
+  @media (pointer: coarse) {
+    .rail {
+      scroll-snap-type: x proximity;
+    }
   }
   .rail::-webkit-scrollbar {
     display: none;
   }
   .rail.is-dragging {
     cursor: grabbing;
-    scroll-snap-type: none;
   }
   .rail:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -295,7 +326,6 @@
     overflow: hidden;
     border: 1px solid var(--color-rule-soft);
     background: var(--color-surface);
-    transform: skewX(calc(var(--rail-v, 0) * 0.6deg));
     transition: border-color 200ms var(--ease-soft);
   }
   .tile-link:hover .tile-panel {
@@ -536,7 +566,6 @@
     gap: 0.75rem 2rem;
     padding-block: 1.75rem;
     border-top: 1px solid var(--color-rule-soft);
-    transition: background-color 200ms var(--ease-soft);
   }
   @media (min-width: 768px) {
     .row {
@@ -569,6 +598,19 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* The skip link sends focus to #main; the jump is the feedback, not a ring. */
+#main:focus {
+  outline: none;
+}
+
+/* Theme switch crossfade — guarded in JS, and kept short here. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 180ms;
   }
 }
 

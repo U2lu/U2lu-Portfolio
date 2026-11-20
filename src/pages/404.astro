@@ -1,5 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+
+const count = (await getCollection('work', ({ data }) => !data.draft)).length;
 ---
 
 <Base
@@ -24,7 +27,7 @@ import Base from '../layouts/Base.astro';
         >
           <span class="display-line text-2xl">Work</span>
           <span class="meta transition-colors group-hover:text-[var(--color-accent-text)]">
-            Five pieces →
+            {count} pieces <span aria-hidden="true">→</span>
           </span>
         </a>
       </li>
@@ -35,7 +38,7 @@ import Base from '../layouts/Base.astro';
         >
           <span class="display-line text-2xl">Design</span>
           <span class="meta transition-colors group-hover:text-[var(--color-accent-text)]">
-            Posters →
+            Posters <span aria-hidden="true">→</span>
           </span>
         </a>
       </li>
@@ -46,7 +49,7 @@ import Base from '../layouts/Base.astro';
         >
           <span class="display-line text-2xl">Home</span>
           <span class="meta transition-colors group-hover:text-[var(--color-accent-text)]">
-            Start again →
+            Start again <span aria-hidden="true">→</span>
           </span>
         </a>
       </li>

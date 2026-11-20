@@ -28,21 +28,24 @@ Node 20.3 or newer. The build is fully static; `dist/` is the whole site.
 | `src/styles/global.css` | Design tokens, light and dark, plus the prose and table styles. |
 | `public/shots/` | Artwork and screenshots. WebP, 1200px wide maximum. |
 | `public/og.png` | Social card, 1200×630. Source and regeneration notes in `scripts/`. |
-| `public/_headers` | Cache and security headers, read by Cloudflare Pages. |
+| `public/_headers` | Cache and security headers, served by the Worker. |
 
 ## Adding a project
 
 1. Put the artwork in `public/shots/` as `.webp` (1200px wide is plenty).
 2. Create `src/content/work/<slug>.mdx` with frontmatter matching
    `src/content.config.ts` — `title`, `discipline` (`engineering` or `design`),
-   `year`, `summary`, `role`, `order`, and a `figures` array.
+   `year`, `summary`, `role`, `order`, and a `figures` array. A figure with a
+   `src` also needs the image's real `width` and `height`, so the browser
+   reserves the right space before it decodes.
 3. Leave `src` off a figure to render its caption as a placeholder.
 4. Set `draft: true` to keep a file out of every index.
 
 It appears on `/work`, on `/design` if it is design, on the homepage rail if it
-is listed in `rail.ts`, and in the sitemap. Two things are written by hand: the
-homepage rail order, and the count in the `/work` headline ("Five things,
-chosen."), which has to change when the set does.
+is listed in `rail.ts`, and in the sitemap. Three things are written by hand:
+the homepage rail order, each rail tile's image `width`/`height`, and the
+`/work` headline ("Five things, chosen."), which has to change when the set
+does. The 404 count reads the collection and stays correct on its own.
 
 ## Deploy
 

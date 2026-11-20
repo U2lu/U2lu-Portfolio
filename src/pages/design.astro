@@ -32,8 +32,8 @@ const design = (await getCollection('work', ({ data }) => !data.draft))
                     <img
                       src={cover.src}
                       alt={cover.alt}
-                      width="1200"
-                      height="1500"
+                      width={cover.width}
+                      height={cover.height}
                       loading={i < 3 ? 'eager' : 'lazy'}
                       decoding="async"
                       class="h-full w-full object-cover"
@@ -41,7 +41,7 @@ const design = (await getCollection('work', ({ data }) => !data.draft))
                   ) : (
                     <div class="flex h-full flex-col justify-between p-4">
                       <span class="meta">{String(i + 1).padStart(2, '0')}</span>
-                      <span class="meta">Open gallery →</span>
+                      <span class="meta">Open gallery <span aria-hidden="true">→</span></span>
                     </div>
                   )}
                 </div>
