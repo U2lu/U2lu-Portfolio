@@ -280,6 +280,32 @@
     inset: -6px;
     border-radius: 999px;
   }
+  /* Sun in light, moon in dark. These selectors mirror the token overrides
+     above, so the icon is correct before the toggle has ever been pressed.
+     The swap is instant: the theme change itself already animates. */
+  .theme-icon {
+    display: grid;
+    place-items: center;
+  }
+  .theme-icon-moon {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  :root[data-theme="dark"] .theme-icon-sun {
+    opacity: 0;
+  }
+  :root[data-theme="dark"] .theme-icon-moon {
+    opacity: 1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-icon-sun {
+      opacity: 0;
+    }
+    :root:not([data-theme="light"]) .theme-icon-moon {
+      opacity: 1;
+    }
+  }
 
   /* ---- Poster rail -------------------------------------------------
      Native horizontal scroll. Drag-to-scroll for mouse users, arrow
