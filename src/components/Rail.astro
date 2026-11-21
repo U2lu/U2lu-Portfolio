@@ -52,7 +52,7 @@ import RailTile from './RailTile.astro';
     if (!rail || !track) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)');
+    //const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)');
     const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
     /* ---- the loop -----------------------------------------------------
@@ -99,16 +99,19 @@ import RailTile from './RailTile.astro';
     let dragging = false;
     let onScreen = true;
     let holdUntil = 0;
+    let touching = false;
+    let resumeTimer = 0;
 
     const driving = () =>
       period > 0 &&
       !reduced.matches &&
-      hoverCapable.matches &&
+      //hoverCapable.matches &&
       !document.hidden &&
       onScreen &&
       !pointerInside &&
       !focusInside &&
       !dragging &&
+      !touching && // for touch devices, the pointer is never inside, so the drift is always fighting a user who is scrolling.
       performance.now() > holdUntil;
 
     const tick = (t: number) => {
@@ -132,6 +135,12 @@ import RailTile from './RailTile.astro';
       autoAt = performance.now();
       rail.scrollLeft = left;
       raf = requestAnimationFrame(tick);*/
+    };
+    // The holdUntil timer is extended on every manual scroll, so the rail doesn't fight a user who is still moving it. The raf is stopped and restarted on every frame, so the drift is always in sync with the scroll position.
+    const holdfor = (ms: number) => {
+      holdUntil = performance.now() + ms;
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(sync, ms + 50);
     };
 
     const sync = () => {
@@ -177,9 +186,15 @@ import RailTile from './RailTile.astro';
       }
     });
 
+    // Phones and tablets scroll natively, so the drift is always fighting a user who is scrolling. The touchstart event fires before the scroll, so it can stop the drift immediately.
+    rail.addEventListener('touchstart', () => {
+      touching = true;
+      sync();
+    },{ passive: true });
+
     document.addEventListener('visibilitychange', sync);
     reduced.addEventListener('change', sync);
-    hoverCapable.addEventListener('change', sync);
+    //hoverCapable.addEventListener('change', sync);
 
     // The rail sits in the hero, so it leaves the viewport as soon as the
     // page is scrolled. No point animating frames nobody can see.
@@ -193,6 +208,13 @@ import RailTile from './RailTile.astro';
       );
       observer.observe(rail);
     }
+
+    const touchDone = () => {
+      touching = false;
+      holdfor(2000); // give the user a moment to finish scrolling before resuming the drift
+    };
+    rail.addEventListener('touchend', touchDone, { passive: true });
+    rail.addEventListener('touchcancel', touchDone, { passive: true });
 
     /* ---- velocity skew: the only flourish, and it decays to zero ---- */
     // Written straight to each panel instead of through a custom property on
@@ -241,6 +263,7 @@ import RailTile from './RailTile.astro';
           window.clearTimeout(settleTimer);
           settleTimer = window.setTimeout(() => {
             if (dragging || period <= 0) return;
+            holdfor(1500); // give the user a moment to finish scrolling before resuming the drift
             if (rail.scrollLeft >= period) rail.scrollLeft %= period;
           }, 180);
         }
@@ -263,7 +286,8 @@ import RailTile from './RailTile.astro';
     rail.addEventListener('pointerdown', (e) => {
       // Touch already scrolls natively; dragging it by hand fights the browser.
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      holdUntil = performance.now() + 800;
+      // holdUntil = performance.now() + 800;
+      holdfor(800); // give the user a moment to finish scrolling before resuming the drift
       dragging = false;
       suppressClick = false;
       startX = e.clientX;
@@ -313,7 +337,8 @@ import RailTile from './RailTile.astro';
       if (rail.hasPointerCapture(e.pointerId)) rail.releasePointerCapture(e.pointerId);
 
       if (fling !== 0) {
-        holdUntil = performance.now() + 1200;
+        // holdUntil = performance.now() + 1200;
+        holdfor(1200); // give the user a moment to finish scrolling before resuming the drift
         rail.scrollBy({ left: fling, behavior: 'smooth' });
       }
       sync();
@@ -341,7 +366,8 @@ import RailTile from './RailTile.astro';
     };
 
     const go = (dir: number) => {
-      holdUntil = performance.now() + 1600;
+      // holdUntil = performance.now() + 1600;
+      holdfor(1600); // give the user a moment to finish scrolling before resuming the drift
       const max = rail.scrollWidth - rail.clientWidth;
 
       // The loop has no ends. "Previous" from the first tile starts one set
@@ -376,7 +402,8 @@ import RailTile from './RailTile.astro';
     rail.addEventListener(
       'wheel',
       () => {
-        holdUntil = performance.now() + 1400;
+        // holdUntil = performance.now() + 1400;
+        holdfor(1400); // give the user a moment to finish scrolling before resuming the drift
         sync();
       },
       { passive: true }
