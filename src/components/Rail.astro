@@ -92,6 +92,7 @@ import RailTile from './RailTile.astro';
     const SPEED = 26; // px per second
     let raf = 0;
     let lastT = 0;
+    let pos = 0;
     let autoAt = -1e9;
     let pointerInside = false;
     let focusInside = false;
@@ -120,17 +121,24 @@ import RailTile from './RailTile.astro';
       const dt = Math.min(t - lastT, 80);
       lastT = t;
 
-      let left = rail.scrollLeft + (SPEED * dt) / 1000;
+      pos += (SPEED * dt) / 1000;
+      if (pos >= period) pos -= period;
+      autoAt = performance.now();
+      rail.scrollLeft = pos;
+      raf = requestAnimationFrame(tick);
+
+      /*let left = rail.scrollLeft + (SPEED * dt) / 1000;
       if (left >= period) left -= period;
       autoAt = performance.now();
       rail.scrollLeft = left;
-      raf = requestAnimationFrame(tick);
+      raf = requestAnimationFrame(tick);*/
     };
 
     const sync = () => {
       if (driving()) {
         if (!raf) {
           lastT = 0;
+          pos = rail.scrollLeft;
           raf = requestAnimationFrame(tick);
         }
       } else if (raf) {
