@@ -1,13 +1,15 @@
 ---
 import { rail } from '../data/rail';
+import RailTile from './RailTile.astro';
 ---
 
 <section aria-labelledby="rail-heading" class="mt-16 md:mt-24">
   <div class="page flex items-end justify-between gap-6">
     <div>
       <h2 id="rail-heading" class="meta">Selected — five pieces</h2>
-      <p class="mt-2 max-w-[38ch] text-sm text-[var(--color-fg-soft)]">
-        Posters, identities and the things I’ve been building. Drag, swipe, or use the arrows.
+      <p class="mt-2 max-w-[42ch] text-sm text-[var(--color-fg-soft)]">
+        Posters, identities and the things I’ve been building. It drifts — hover to hold it, or
+        drag, swipe and use the arrows.
       </p>
     </div>
 
@@ -33,77 +35,160 @@ import { rail } from '../data/rail';
     aria-label="Selected work, horizontally scrollable"
   >
     <ul role="list" class="rail-track">
-      {
-        rail.map((item, i) => (
-          <li class="tile">
-            <a class="tile-link group" href={item.href}>
-              <div class:list={['tile-panel', `tile-panel--${item.tone ?? 'wash'}`]}>
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.alt ?? item.title}
-                    width={item.width}
-                    height={item.height}
-                    loading={i < 2 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    draggable="false"
-                  />
-                ) : (
-                  <div class="tile-type">
-                    <span class="meta">{String(i + 1).padStart(2, '0')}</span>
-                    <span class="tile-type-title">{item.title}</span>
-                  </div>
-                )}
-              </div>
-              <div class="pt-3">
-                <p class="font-display text-lg leading-tight transition-colors duration-200 group-hover:text-[var(--color-accent-text)]">
-                  {item.title}
-                </p>
-                <p class="meta mt-1">{item.meta}</p>
-              </div>
-            </a>
-          </li>
-        ))
-      }
-
-      <li class="tile">
-        <a class="tile-link group" href="/work">
-          <div class="tile-panel tile-panel--link">
-            <div class="tile-type">
-              <span class="meta">All</span>
-              <span class="tile-type-title">Everything<br />else <span aria-hidden="true">→</span></span>
-            </div>
-          </div>
-          <div class="pt-3">
-            <p class="font-display text-lg leading-tight transition-colors duration-200 group-hover:text-[var(--color-accent-text)]">
-              The full index
-            </p>
-            <p class="meta mt-1">Work</p>
-          </div>
-        </a>
-      </li>
+      {rail.map((item, i) => <RailTile item={item} index={i} />)}
+      <RailTile index={rail.length} />
+      {rail.map((item, i) => <RailTile item={item} index={i} clone />)}
+      <RailTile index={rail.length} clone />
     </ul>
-  </div>
-
-  <div class="page mt-3">
-    <div class="rail-progress" aria-hidden="true"><span data-rail-progress></span></div>
   </div>
 </section>
 
 <script>
-  const rail = document.querySelector<HTMLElement>('[data-rail]');
-  const track = rail?.querySelector<HTMLElement>('.rail-track');
-  const progress = document.querySelector<HTMLElement>('[data-rail-progress]');
-  const prev = document.querySelector<HTMLButtonElement>('[data-rail-prev]');
-  const next = document.querySelector<HTMLButtonElement>('[data-rail-next]');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  (() => {
+    const rail = document.querySelector<HTMLElement>('[data-rail]');
+    const track = rail?.querySelector<HTMLElement>('.rail-track');
+    const prev = document.querySelector<HTMLButtonElement>('[data-rail-prev]');
+    const next = document.querySelector<HTMLButtonElement>('[data-rail-next]');
+    if (!rail || !track) return;
 
-  if (rail && track) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)');
     const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
-    /* ---- velocity skew: the only "motion" flourish on the site ---- */
+    /* ---- the loop -----------------------------------------------------
+       The tile set is rendered twice. The copy is inert and aria-hidden,
+       so it exists only for the eye: scrolling by exactly one set is
+       invisible, which is what lets the rail wrap without a seam.
+    -------------------------------------------------------------------- */
+    let period = 0;
+
+    const measure = () => {
+      // Measure with the copy visible, even if the last layout hid it.
+      rail.removeAttribute('data-static');
+      const tiles = track.querySelectorAll<HTMLElement>('.tile');
+      const first = tiles[0];
+      const firstClone = tiles[Math.floor(tiles.length / 2)];
+      period =
+        first && firstClone
+          ? firstClone.getBoundingClientRect().left - first.getBoundingClientRect().left
+          : 0;
+
+      // A loop needs at least one full set of scroll travel. On screens
+      // wide enough to show the set twice there is none, so drop the copy
+      // rather than leave a duplicate index tile on display.
+      const loopable = period > 0 && rail.scrollWidth - rail.clientWidth >= period;
+      if (!loopable) {
+        rail.setAttribute('data-static', '');
+        period = 0;
+      }
+      return loopable;
+    };
+
+    /* ---- auto-drive --------------------------------------------------
+       A slow drift, one frame at a time. It holds still while the pointer
+       is over the rail, while something inside has focus, while dragging,
+       and for a moment after any manual scroll so it never fights one.
+    -------------------------------------------------------------------- */
+    const SPEED = 26; // px per second
+    let raf = 0;
+    let lastT = 0;
+    let autoAt = -1e9;
+    let pointerInside = false;
+    let focusInside = false;
+    let dragging = false;
+    let onScreen = true;
+    let holdUntil = 0;
+
+    const driving = () =>
+      period > 0 &&
+      !reduced.matches &&
+      hoverCapable.matches &&
+      !document.hidden &&
+      onScreen &&
+      !pointerInside &&
+      !focusInside &&
+      !dragging &&
+      performance.now() > holdUntil;
+
+    const tick = (t: number) => {
+      raf = 0;
+      if (!driving()) {
+        lastT = 0;
+        return;
+      }
+      if (!lastT) lastT = t;
+      const dt = Math.min(t - lastT, 80);
+      lastT = t;
+
+      let left = rail.scrollLeft + (SPEED * dt) / 1000;
+      if (left >= period) left -= period;
+      autoAt = performance.now();
+      rail.scrollLeft = left;
+      raf = requestAnimationFrame(tick);
+    };
+
+    const sync = () => {
+      if (driving()) {
+        if (!raf) {
+          lastT = 0;
+          raf = requestAnimationFrame(tick);
+        }
+      } else if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        lastT = 0;
+      }
+    };
+
+    rail.addEventListener('pointerenter', () => {
+      pointerInside = true;
+      sync();
+    });
+    // Pointerenter does not fire if the page loaded with the cursor already
+    // over the rail. Any movement inside it should still stop the drift.
+    rail.addEventListener('pointermove', () => {
+      if (pointerInside) return;
+      pointerInside = true;
+      sync();
+    });
+    rail.addEventListener('pointerleave', () => {
+      pointerInside = false;
+      sync();
+    });
+
+    // Keyboard focus needs the rail to stay put under the caret.
+    rail.addEventListener('focusin', () => {
+      focusInside = true;
+      sync();
+    });
+    rail.addEventListener('focusout', (e) => {
+      const to = e.relatedTarget as Node | null;
+      if (!to || !rail.contains(to)) {
+        focusInside = false;
+        sync();
+      }
+    });
+
+    document.addEventListener('visibilitychange', sync);
+    reduced.addEventListener('change', sync);
+    hoverCapable.addEventListener('change', sync);
+
+    // The rail sits in the hero, so it leaves the viewport as soon as the
+    // page is scrolled. No point animating frames nobody can see.
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          onScreen = entry.isIntersecting;
+          sync();
+        },
+        { rootMargin: '200px 0px' }
+      );
+      observer.observe(rail);
+    }
+
+    /* ---- velocity skew: the only flourish, and it decays to zero ---- */
     // Written straight to each panel instead of through a custom property on
-    // the track, so a frame only invalidates the six elements that move.
+    // the track, so a frame only invalidates the twelve elements that move.
     const panels = Array.from(track.querySelectorAll<HTMLElement>('.tile-panel'));
     const setSkew = (v: number) => {
       const transform = v === 0 ? '' : `skewX(${(v * 0.6).toFixed(2)}deg)`;
@@ -112,18 +197,19 @@ import { rail } from '../data/rail';
 
     let lastLeft = rail.scrollLeft;
     let velocity = 0;
-    let raf = 0;
+    let skewRaf = 0;
+    let settleTimer = 0;
 
     const decay = () => {
       velocity *= 0.9;
       if (Math.abs(velocity) < 0.15) {
         velocity = 0;
         setSkew(0);
-        raf = 0;
+        skewRaf = 0;
         return;
       }
       setSkew(velocity);
-      raf = requestAnimationFrame(decay);
+      skewRaf = requestAnimationFrame(decay);
     };
 
     rail.addEventListener(
@@ -132,23 +218,27 @@ import { rail } from '../data/rail';
         const left = rail.scrollLeft;
         const delta = left - lastLeft;
         lastLeft = left;
-        updateProgress();
+        const manual = performance.now() - autoAt > 120;
 
-        if (!reduced.matches) {
+        // The auto-loop writes every frame. Skewing that would make the
+        // rail shiver, so only manual movement feeds the flourish.
+        if (!reduced.matches && manual) {
           velocity = clamp(velocity + delta * 0.22, -4, 4);
-          if (!raf) raf = requestAnimationFrame(decay);
+          if (!skewRaf) skewRaf = requestAnimationFrame(decay);
+        }
+
+        // Wheel and trackpad can travel into the copy. Stepping back a whole
+        // set once movement settles is invisible, and keeps the buffer intact.
+        if (manual) {
+          window.clearTimeout(settleTimer);
+          settleTimer = window.setTimeout(() => {
+            if (dragging || period <= 0) return;
+            if (rail.scrollLeft >= period) rail.scrollLeft %= period;
+          }, 180);
         }
       },
       { passive: true }
     );
-
-    const updateProgress = () => {
-      const max = rail.scrollWidth - rail.clientWidth;
-      const p = max > 0 ? rail.scrollLeft / max : 0;
-      if (progress) progress.style.transform = `scaleX(${p})`;
-      if (prev) prev.disabled = rail.scrollLeft < 8;
-      if (next) next.disabled = rail.scrollLeft > max - 8;
-    };
 
     /* ---- drag to scroll, so a mouse user is never stuck ---- */
     // Capture is deferred until the pointer has actually moved. Capturing on
@@ -156,7 +246,6 @@ import { rail } from '../data/rail';
     // links never see it and nothing navigates.
     const DRAG_THRESHOLD = 5;
 
-    let dragging = false;
     let suppressClick = false;
     let startX = 0;
     let startScroll = 0;
@@ -166,6 +255,7 @@ import { rail } from '../data/rail';
     rail.addEventListener('pointerdown', (e) => {
       // Touch already scrolls natively; dragging it by hand fights the browser.
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      holdUntil = performance.now() + 800;
       dragging = false;
       suppressClick = false;
       startX = e.clientX;
@@ -181,6 +271,7 @@ import { rail } from '../data/rail';
       if (!dragging) {
         if (Math.abs(dx) < DRAG_THRESHOLD) return;
         dragging = true;
+        sync();
         rail.setPointerCapture(e.pointerId);
         rail.classList.add('is-dragging');
       }
@@ -213,7 +304,11 @@ import { rail } from '../data/rail';
       rail.classList.remove('is-dragging');
       if (rail.hasPointerCapture(e.pointerId)) rail.releasePointerCapture(e.pointerId);
 
-      if (fling !== 0) rail.scrollBy({ left: fling, behavior: 'smooth' });
+      if (fling !== 0) {
+        holdUntil = performance.now() + 1200;
+        rail.scrollBy({ left: fling, behavior: 'smooth' });
+      }
+      sync();
     };
     rail.addEventListener('pointerup', endDrag);
     rail.addEventListener('pointercancel', endDrag);
@@ -230,33 +325,72 @@ import { rail } from '../data/rail';
       true
     );
 
+    /* ---- arrows / keyboard ------------------------------------------- */
+    const gap = () => parseFloat(getComputedStyle(track).columnGap) || 24;
     const step = () => {
       const tile = track.querySelector<HTMLElement>('.tile');
-      return tile ? tile.offsetWidth + 24 : 320;
+      return tile ? tile.offsetWidth + gap() : 320;
     };
 
-    const scrollBy = (dir: number) => {
+    const go = (dir: number) => {
+      holdUntil = performance.now() + 1600;
+      const max = rail.scrollWidth - rail.clientWidth;
+
+      // The loop has no ends. "Previous" from the first tile starts one set
+      // along — visually the same place — and then travels back.
+      if (dir < 0 && rail.scrollLeft < 1 && period > 0) {
+        rail.scrollLeft = period;
+      } else if (dir > 0 && rail.scrollLeft >= max - 1 && period > 0) {
+        rail.scrollLeft = Math.max(0, rail.scrollLeft - period);
+      }
+
       rail.scrollBy({
         left: dir * step() * 1.5,
         behavior: reduced.matches ? 'auto' : 'smooth',
       });
+      sync();
     };
 
-    prev?.addEventListener('click', () => scrollBy(-1));
-    next?.addEventListener('click', () => scrollBy(1));
+    prev?.addEventListener('click', () => go(-1));
+    next?.addEventListener('click', () => go(1));
 
     rail.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        scrollBy(1);
+        go(1);
       }
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        scrollBy(-1);
+        go(-1);
       }
     });
 
-    updateProgress();
-    window.addEventListener('resize', updateProgress, { passive: true });
-  }
+    rail.addEventListener(
+      'wheel',
+      () => {
+        holdUntil = performance.now() + 1400;
+        sync();
+      },
+      { passive: true }
+    );
+
+    /* ---- boot / resize ---------------------------------------------- */
+    let resizeTimer = 0;
+    window.addEventListener(
+      'resize',
+      () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+          measure();
+          lastLeft = rail.scrollLeft;
+          sync();
+        }, 120);
+      },
+      { passive: true }
+    );
+
+    measure();
+    lastLeft = rail.scrollLeft;
+    sync();
+  })();
 </script>

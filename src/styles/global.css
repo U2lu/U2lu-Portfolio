@@ -308,17 +308,25 @@
   }
 
   /* ---- Poster rail -------------------------------------------------
-     Native horizontal scroll. Drag-to-scroll for mouse users, arrow
-     buttons for keyboard, snap for touch. The skew is the only
-     decorative motion on the site and it decays to zero.
+     A slow, seamless drift, with native scroll as the manual layer.
+     The tile set is rendered twice; the mask fades both ends so tiles
+     arrive and leave through the gutter instead of being cut off.
   ------------------------------------------------------------------- */
   .rail {
+    --rail-pad: clamp(1.25rem, 5vw, 4rem);
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    scroll-padding-inline: clamp(1.25rem, 5vw, 4rem);
+    scroll-padding-inline: var(--rail-pad);
     scrollbar-width: none;
     cursor: grab;
     user-select: none;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--rail-pad),
+      #000 calc(100% - var(--rail-pad)),
+      transparent 100%
+    );
   }
   /* Snap is for fingers; a mouse flick should not be yanked back to a tile. */
   @media (pointer: coarse) {
@@ -339,8 +347,15 @@
   .rail-track {
     display: flex;
     gap: clamp(1rem, 2vw, 1.5rem);
-    padding-inline: clamp(1.25rem, 5vw, 4rem);
+    padding-inline: var(--rail-pad);
     width: max-content;
+  }
+  /* Without JS there is no loop, so the duplicate set is not shipped to
+     the eye either. `data-static` is added when a screen is too wide to
+     loop, for the same reason. */
+  html:not(.has-js) .tile[data-clone],
+  .rail[data-static] .tile[data-clone] {
+    display: none;
   }
   .tile {
     width: clamp(15rem, 30vw, 21rem);
@@ -416,19 +431,6 @@
   .rail-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
-  }
-  .rail-progress {
-    height: 1px;
-    background: var(--color-rule-soft);
-    overflow: hidden;
-  }
-  .rail-progress span {
-    display: block;
-    height: 1px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 120ms linear;
   }
 
   /* Controls that only work with JS must not appear without it. */

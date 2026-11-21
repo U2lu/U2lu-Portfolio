@@ -1,0 +1,61 @@
+---
+import type { RailItem } from '../data/rail';
+
+interface Props {
+  /** Omitted for the closing tile that leads to the full index. */
+  item?: RailItem;
+  /** Curated position; typographic tiles print it as 01–05. */
+  index: number;
+  /** Duplicate copy for the loop. Hidden from AT and skipped by Tab. */
+  clone?: boolean;
+}
+
+const { item, index, clone = false } = Astro.props;
+---
+
+<li
+  class="tile"
+  aria-hidden={clone ? 'true' : undefined}
+  inert={clone ? true : undefined}
+  data-clone={clone ? '' : undefined}
+>
+  <a class="tile-link group" href={item?.href ?? '/work'} tabindex={clone ? -1 : undefined}>
+    {
+      item ? (
+        <div class:list={['tile-panel', `tile-panel--${item.tone ?? 'wash'}`]}>
+          {item.image ? (
+            <img
+              src={item.image}
+              alt={item.alt ?? item.title}
+              width={item.width}
+              height={item.height}
+              loading={index < 2 && !clone ? 'eager' : 'lazy'}
+              decoding="async"
+              draggable="false"
+            />
+          ) : (
+            <div class="tile-type">
+              <span class="meta">{String(index + 1).padStart(2, '0')}</span>
+              <span class="tile-type-title">{item.title}</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div class="tile-panel tile-panel--link">
+          <div class="tile-type">
+            <span class="meta">All</span>
+            <span class="tile-type-title">
+              Everything<br />else <span aria-hidden="true">→</span>
+            </span>
+          </div>
+        </div>
+      )
+    }
+    <div class="pt-3">
+      <p class="font-display text-lg leading-tight transition-colors duration-200 group-hover:text-[var(--color-accent-text)]">
+        {item?.title ?? 'The full index'}
+      </p>
+      <p class="meta mt-1">{item?.meta ?? 'Work'}</p>
+    </div>
+  </a>
+</li>
