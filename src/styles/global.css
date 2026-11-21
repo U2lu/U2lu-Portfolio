@@ -316,7 +316,7 @@
     --rail-pad: clamp(1.25rem, 5vw, 4rem);
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    scroll-padding-inline: var(--rail-pad);
+    /* scroll-padding-inline: var(--rail-pad); */
     scrollbar-width: none;
     cursor: grab;
     user-select: none;
@@ -329,11 +329,11 @@
     );
   }
   /* Snap is for fingers; a mouse flick should not be yanked back to a tile. */
-  @media (pointer: coarse) {
+  /* @media (pointer: coarse) {
     .rail {
       scroll-snap-type: x proximity;
     }
-  }
+  }*/
   .rail::-webkit-scrollbar {
     display: none;
   }
@@ -359,7 +359,7 @@
   }
   .tile {
     width: clamp(15rem, 30vw, 21rem);
-    scroll-snap-align: start;
+    /* scroll-snap-align: start; */
   }
   .tile-panel {
     position: relative;
